@@ -16,7 +16,7 @@ export default defineConfig({
   timeout: 30_000,
   expect: { timeout: 5_000 },
 
-  reporter: [['html', { open: 'never' }], ['list']],
+  reporter: [['html'],['github'], { open: 'never' }], ['list']],
 
   use: {
     baseURL: 'https://www.google.com',
