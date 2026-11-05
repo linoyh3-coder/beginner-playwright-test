@@ -1,28 +1,34 @@
 import { test, expect } from '@playwright/test';
+import { GamePage } from '../../pages/GamePage';
 
 test.describe('עיצוב וחוויית משתמש', () => {
+  let game: GamePage;
+
+  test.beforeEach(async ({ page }) => {
+    game = new GamePage(page);
+  });
+
   test('מעבר בין מצב בהיר לכהה, והבחירה נשמרת', async ({ page }) => {
     // מתחילים במצב בהיר (כמו מחשב שמוגדר למצב בהיר)
     await page.emulateMedia({ colorScheme: 'light' });
-    await page.goto('/');
+    await game.goto();
     const html = page.locator('html');
-    const toggle = page.getByTestId('theme-toggle');
 
-    await toggle.click();
+    await game.themeToggle.click();
     await expect(html).toHaveAttribute('data-theme', 'dark');
-    await expect(toggle).toHaveAccessibleName('Switch to light mode');
+    await expect(game.themeToggle).toHaveAccessibleName('Switch to light mode');
 
     // אחרי רענון הדף הבחירה נשארת (נשמרת ב-localStorage)
     await page.reload();
     await expect(html).toHaveAttribute('data-theme', 'dark');
 
-    await toggle.click();
+    await game.themeToggle.click();
     await expect(html).toHaveAttribute('data-theme', 'light');
   });
 
   test('הכפתורים נגישים לפי התפקיד והשם שלהם', async ({ page }) => {
     // getByRole מחפש כמו שקורא מסך מחפש – סימן שהאתר נגיש
-    await page.goto('/');
+    await game.goto();
     await page.getByRole('textbox', { name: 'Buddy name' }).fill('Noa');
     await page.getByRole('button', { name: /Start living/ }).click();
 
@@ -32,13 +38,12 @@ test.describe('עיצוב וחוויית משתמש', () => {
 
   test('המשחק עובד גם במסך של טלפון', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 }); // גודל של אייפון
-    await page.goto('/');
-    await page.getByTestId('name-input').fill('Noa');
-    await page.getByTestId('start-button').click();
+    await game.goto();
+    await game.createCharacter('Noa');
 
-    await expect(page.getByTestId('action-eat')).toBeVisible();
-    await page.getByTestId('action-eat').click();
-    await expect(page.getByTestId('money')).toHaveText('40');
+    await expect(game.action('eat')).toBeVisible();
+    await game.doAction('eat');
+    await expect(game.money).toHaveText('40');
 
     // אין גלילה לרוחב – הדף לא רחב יותר מהמסך
     const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);

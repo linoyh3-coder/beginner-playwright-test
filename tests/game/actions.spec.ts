@@ -1,105 +1,99 @@
 import { test, expect } from '@playwright/test';
+import { GamePage } from '../../pages/GamePage';
 
 test.describe('פעולות של הדמות', () => {
-  // לפני כל בדיקה: נכנסים למשחק ויוצרים דמות בשם Noa
+  let game: GamePage;
+
+  // לפני כל בדיקה: נכנסים למשחק (עם זמן קפוא) ויוצרים דמות בשם Noa
   test.beforeEach(async ({ page }) => {
-    // מקפיאים את הזמן: בלי זה, אם הבדיקה איטית (מעל 3 שניות),
-    // הצרכים יורדים באמצע והמספרים לא יוצאים כמו שציפינו
-    await page.clock.install({ time: new Date('2026-01-01T10:00:00') });
-    await page.goto('/');
-    await page.clock.pauseAt(new Date('2026-01-01T10:00:01')); // הזמן עוצר כאן
-    await page.getByTestId('name-input').fill('Noa');
-    await page.getByTestId('start-button').click();
+    game = new GamePage(page);
+    await game.gotoWithFrozenClock();
+    await game.createCharacter('Noa');
   });
 
-  test('אכילה מעלה שובע, מורידה ניקיון ועולה 10 $', async ({ page }) => {
-    await page.getByTestId('action-eat').click();
+  test('אכילה מעלה שובע, מורידה ניקיון ועולה 10 $', async () => {
+    await game.doAction('eat');
 
     // 80 + 30 = 110, אבל המקסימום הוא 100
-    await expect(page.getByTestId('food-value')).toHaveText('100');
-    await expect(page.getByTestId('hygiene-value')).toHaveText('75');
-    await expect(page.getByTestId('money')).toHaveText('40');
+    await expect(game.needValue('food')).toHaveText('100');
+    await expect(game.needValue('hygiene')).toHaveText('75');
+    await expect(game.money).toHaveText('40');
   });
 
-  test('משחק מעלה כיף ומוריד אנרגיה', async ({ page }) => {
-    await page.getByTestId('action-play').click();
+  test('משחק מעלה כיף ומוריד אנרגיה', async () => {
+    await game.doAction('play');
 
-    await expect(page.getByTestId('fun-value')).toHaveText('100');
-    await expect(page.getByTestId('energy-value')).toHaveText('70');
+    await expect(game.needValue('fun')).toHaveText('100');
+    await expect(game.needValue('energy')).toHaveText('70');
   });
 
-  test('עבודה מכניסה כסף אבל מעייפת', async ({ page }) => {
-    await page.getByTestId('action-work').click();
+  test('עבודה מכניסה כסף אבל מעייפת', async () => {
+    await game.doAction('work');
 
-    await expect(page.getByTestId('money')).toHaveText('70');
-    await expect(page.getByTestId('energy-value')).toHaveText('65');
-    await expect(page.getByTestId('fun-value')).toHaveText('70');
+    await expect(game.money).toHaveText('70');
+    await expect(game.needValue('energy')).toHaveText('65');
+    await expect(game.needValue('fun')).toHaveText('70');
   });
 
-  test('שינה ומקלחת לא עוברות את 100', async ({ page }) => {
-    await page.getByTestId('action-sleep').click();
-    await page.getByTestId('action-shower').click();
+  test('שינה ומקלחת לא עוברות את 100', async () => {
+    await game.doAction('sleep');
+    await game.doAction('shower');
 
-    await expect(page.getByTestId('energy-value')).toHaveText('100');
-    await expect(page.getByTestId('hygiene-value')).toHaveText('100');
+    await expect(game.needValue('energy')).toHaveText('100');
+    await expect(game.needValue('hygiene')).toHaveText('100');
   });
 
-  test('אי אפשר לאכול כשנגמר הכסף, ומופיע הסבר', async ({ page }) => {
-    const eat = page.getByTestId('action-eat');
-
+  test('אי אפשר לאכול כשנגמר הכסף, ומופיע הסבר', async () => {
     // יש 50 $, כל ארוחה עולה 10 $ ← אפשר לאכול 5 פעמים
     for (let i = 0; i < 5; i++) {
-      await eat.click();
+      await game.doAction('eat');
     }
 
-    await expect(page.getByTestId('money')).toHaveText('0');
-    await expect(eat).toBeDisabled();
-    await expect(page.getByTestId('eat-hint')).toHaveText('Not enough money');
+    await expect(game.money).toHaveText('0');
+    await expect(game.action('eat')).toBeDisabled();
+    await expect(game.actionHint('eat')).toHaveText('Not enough money');
   });
 
-  test('אי אפשר לעבוד כשהדמות עייפה מדי', async ({ page }) => {
-    const work = page.getByTestId('action-work');
-
+  test('אי אפשר לעבוד כשהדמות עייפה מדי', async () => {
     // אנרגיה: 80 → 65 → 50 → 35 → 20 → 5
     for (let i = 0; i < 5; i++) {
-      await work.click();
+      await game.doAction('work');
     }
 
-    await expect(page.getByTestId('energy-value')).toHaveText('5');
-    await expect(work).toBeDisabled();
-    await expect(page.getByTestId('work-hint')).toHaveText('Too tired to work');
+    await expect(game.needValue('energy')).toHaveText('5');
+    await expect(game.action('work')).toBeDisabled();
+    await expect(game.actionHint('work')).toHaveText('Too tired to work');
 
     // אחרי שינה אפשר לעבוד שוב, וההסבר נעלם
-    await page.getByTestId('action-sleep').click();
-    await expect(work).toBeEnabled();
-    await expect(page.getByTestId('work-hint')).toBeHidden();
+    await game.doAction('sleep');
+    await expect(game.action('work')).toBeEnabled();
+    await expect(game.actionHint('work')).toBeHidden();
   });
 
-  test('כל פעולה נרשמת ביומן, האחרונה למעלה', async ({ page }) => {
-    await expect(page.getByTestId('log-empty')).toBeVisible();
+  test('כל פעולה נרשמת ביומן, האחרונה למעלה', async () => {
+    await expect(game.logEmpty).toBeVisible();
 
-    await page.getByTestId('action-eat').click();
-    await page.getByTestId('action-sleep').click();
+    await game.doAction('eat');
+    await game.doAction('sleep');
 
-    const entries = page.getByTestId('log-text');
-    await expect(entries).toHaveCount(2);
-    await expect(entries.first()).toHaveText('Noa took a nap');
-    await expect(entries.last()).toHaveText('Noa had a meal');
-    await expect(page.getByTestId('log-empty')).toBeHidden();
+    await expect(game.logEntries).toHaveCount(2);
+    await expect(game.logEntries.first()).toHaveText('Noa took a nap');
+    await expect(game.logEntries.last()).toHaveText('Noa had a meal');
+    await expect(game.logEmpty).toBeHidden();
   });
 
-  test('אחרי פעולה מופיעה הודעה קופצת', async ({ page }) => {
-    await page.getByTestId('action-shower').click();
+  test('אחרי פעולה מופיעה הודעה קופצת', async () => {
+    await game.doAction('shower');
 
-    await expect(page.getByTestId('toast')).toHaveText('Noa took a shower');
-    await expect(page.getByTestId('toast')).toHaveClass(/visible/);
+    await expect(game.toast).toHaveText('Noa took a shower');
+    await expect(game.toast).toHaveClass(/visible/);
   });
 
-  test('התחלה מחדש מחזירה למסך יצירת הדמות', async ({ page }) => {
-    await page.getByTestId('reset-button').click();
+  test('התחלה מחדש מחזירה למסך יצירת הדמות', async () => {
+    await game.resetButton.click();
 
-    await expect(page.getByTestId('create-screen')).toBeVisible();
-    await expect(page.getByTestId('game-screen')).toBeHidden();
-    await expect(page.getByTestId('name-input')).toBeEmpty();
+    await expect(game.createScreen).toBeVisible();
+    await expect(game.gameScreen).toBeHidden();
+    await expect(game.nameInput).toBeEmpty();
   });
 });

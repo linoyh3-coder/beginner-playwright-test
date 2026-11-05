@@ -1,52 +1,53 @@
 import { test, expect } from '@playwright/test';
+import { GamePage } from '../../pages/GamePage';
 
 test.describe('יצירת דמות', () => {
+  let game: GamePage;
+
   test.beforeEach(async ({ page }) => {
-    // '/' = כתובת המשחק (מוגדרת ב-baseURL בקובץ playwright.config.ts)
-    await page.goto('/');
+    game = new GamePage(page);
+    await game.goto();
   });
 
-  test('כפתור ההתחלה מושבת כשאין שם', async ({ page }) => {
-    await expect(page.getByTestId('start-button')).toBeDisabled();
+  test('כפתור ההתחלה מושבת כשאין שם', async () => {
+    await expect(game.startButton).toBeDisabled();
   });
 
-  test('שם עם רווחים בלבד לא מתקבל', async ({ page }) => {
-    await page.getByTestId('name-input').fill('   ');
-    await expect(page.getByTestId('start-button')).toBeDisabled();
+  test('שם עם רווחים בלבד לא מתקבל', async () => {
+    await game.nameInput.fill('   ');
+    await expect(game.startButton).toBeDisabled();
   });
 
-  test('יצירת דמות פותחת את מסך המשחק עם ערכי התחלה', async ({ page }) => {
-    await page.getByTestId('name-input').fill('Noa');
-    await page.getByTestId('start-button').click();
+  test('יצירת דמות פותחת את מסך המשחק עם ערכי התחלה', async () => {
+    await game.createCharacter('Noa');
 
     // מסך היצירה נעלם ומסך המשחק מופיע
-    await expect(page.getByTestId('create-screen')).toBeHidden();
-    await expect(page.getByTestId('game-screen')).toBeVisible();
+    await expect(game.createScreen).toBeHidden();
+    await expect(game.gameScreen).toBeVisible();
 
     // בדיקת ערכי ההתחלה
-    await expect(page.getByTestId('character-name')).toHaveText('Noa');
-    await expect(page.getByTestId('money')).toHaveText('50');
-    await expect(page.getByTestId('food-value')).toHaveText('80');
-    await expect(page.getByTestId('energy-value')).toHaveText('80');
-    await expect(page.getByTestId('fun-value')).toHaveText('80');
-    await expect(page.getByTestId('hygiene-value')).toHaveText('80');
-    await expect(page.getByTestId('mood')).toHaveText('Great');
-    await expect(page.getByTestId('avatar')).toHaveText('😄');
-    await expect(page.getByTestId('survival-time')).toHaveText('0:00');
+    await expect(game.characterName).toHaveText('Noa');
+    await expect(game.money).toHaveText('50');
+    await expect(game.needValue('food')).toHaveText('80');
+    await expect(game.needValue('energy')).toHaveText('80');
+    await expect(game.needValue('fun')).toHaveText('80');
+    await expect(game.needValue('hygiene')).toHaveText('80');
+    await expect(game.mood).toHaveText('Great');
+    await expect(game.avatar).toHaveText('😄');
+    await expect(game.survivalTime).toHaveText('0:00');
   });
 
-  test('אפשר להתחיל גם בלחיצה על Enter', async ({ page }) => {
-    await page.getByTestId('name-input').fill('Dan');
-    await page.getByTestId('name-input').press('Enter');
+  test('אפשר להתחיל גם בלחיצה על Enter', async () => {
+    await game.nameInput.fill('Dan');
+    await game.nameInput.press('Enter');
 
-    await expect(page.getByTestId('character-name')).toHaveText('Dan');
+    await expect(game.characterName).toHaveText('Dan');
   });
 
-  test('שם עם קוד HTML מוצג כטקסט רגיל ולא מורץ', async ({ page }) => {
+  test('שם עם קוד HTML מוצג כטקסט רגיל ולא מורץ', async () => {
     // בדיקת אבטחה בסיסית: מה שהמשתמש מקליד לא אמור להפוך לקוד בדף
-    await page.getByTestId('name-input').fill('<b>Bold</b>');
-    await page.getByTestId('start-button').click();
+    await game.createCharacter('<b>Bold</b>');
 
-    await expect(page.getByTestId('character-name')).toHaveText('<b>Bold</b>');
+    await expect(game.characterName).toHaveText('<b>Bold</b>');
   });
 });

@@ -31,6 +31,20 @@
 | `tests/game/ui.spec.ts` | מצב כהה/בהיר, נגישות (`getByRole`), תצוגת טלפון |
 | `tests/saucedemo/login.spec.ts` | התחברות לאתר תרגול חיצוני |
 
+## 🧩 Page Object Model
+
+כל ה"איך מוצאים אלמנט במשחק" וכל הפעולות מרוכזים בקובץ אחד:
+[`pages/GamePage.ts`](pages/GamePage.ts). הבדיקות משתמשות בו, ולכן הן קצרות וקריאות.
+אם משהו באתר ישתנה – מתקנים שם פעם אחת, לא בכל הבדיקות.
+
+```ts
+const game = new GamePage(page);
+await game.goto();
+await game.createCharacter('Noa');
+await game.doAction('eat');
+await expect(game.money).toHaveText('40');
+```
+
 ## 📁 מבנה הפרויקט
 
 ```
