@@ -41,6 +41,28 @@ const MOODS = [
   { min: 0,  label: 'Bad',   face: '😢', className: 'mood-bad' },
 ];
 
+// The in-game clock: the game starts at 08:00 and every tick is one hour
+const START_HOUR = 8;
+const PHASE_ICONS = { day: '☀️', evening: '🌇', night: '🌙' };
+
+// What the buddy "thinks about" when a need is low
+const NEED_THOUGHTS = { food: '🍔', energy: '😴', fun: '🎮', hygiene: '🧼' };
+
+// Where in the apartment each action / shop item happens
+const ROOM_ACTIVITY = {
+  eat:    { spot: 'kitchen', emoji: '🍔' },
+  sleep:  { spot: 'bed',     emoji: '💤', effect: 'sleep' },
+  play:   { spot: 'tv',      emoji: '🎮', effect: 'tv' },
+  shower: { spot: 'bath',    emoji: '🫧', effect: 'shower' },
+  work:   { spot: 'desk',    emoji: '💻', effect: 'work' },
+  coffee: { spot: 'kitchen', emoji: '☕' },
+  pizza:  { spot: 'tv',      emoji: '🍕', effect: 'tv' },
+  spa:    { spot: 'bath',    emoji: '🧖', effect: 'shower' },
+};
+
+// Clicking a piece of furniture in the room runs this action
+const FURNITURE = { kitchen: 'eat', bed: 'sleep', tv: 'play', bath: 'shower', desk: 'work' };
+
 // localStorage keys
 const THEME_KEY = 'tiny-life-theme';
 const SAVE_KEY = 'tiny-life-save';   // the current game (auto-save)
@@ -81,6 +103,20 @@ function formatTime(totalSeconds) {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = String(totalSeconds % 60).padStart(2, '0');
   return `${minutes}:${seconds}`;
+}
+
+// 06:00–16:59 day, 17:00–19:59 evening, otherwise night
+function timeOfDay(hour) {
+  const h = hour % 24;
+  if (h >= 6 && h < 17) return 'day';
+  if (h >= 17 && h < 20) return 'evening';
+  return 'night';
+}
+
+function formatClock(hour) {
+  const day = Math.floor(hour / 24) + 1;
+  const h = String(hour % 24).padStart(2, '0');
+  return `Day ${day} · ${h}:00`;
 }
 
 // ===== Saved data (localStorage) =====
@@ -156,6 +192,21 @@ function render() {
     if (hint) hint.textContent = blocked ? 'Not enough money' : '';
   }
 
+  // The apartment: clock, light, the buddy's face and thoughts, usable furniture
+  const phase = timeOfDay(state.hour);
+  el('game-clock').textContent = formatClock(state.hour);
+  el('phase-icon').textContent = PHASE_ICONS[phase];
+  Room.setPhase(phase);
+  Room.setClock(state.hour);
+  Room.setMood(mood.className);
+  const lowest = Object.keys(NEEDS)
+    .filter((key) => state[key] <= LOW_LIMIT)
+    .sort((a, b) => state[a] - state[b])[0];
+  Room.setThought(lowest ? NEED_THOUGHTS[lowest] : '');
+  for (const [object, action] of Object.entries(FURNITURE)) {
+    Room.setBlocked(object, blockedReason(action));
+  }
+
   el('log-empty').hidden = el('log').children.length > 0;
 }
 
@@ -205,6 +256,7 @@ function gameOver() {
   clearInterval(timer);
   timer = null;
   state.over = true;
+  Room.setActive(false);
 
   const best = loadBest();
   const isRecord = state.elapsed > best;
@@ -230,7 +282,20 @@ function doAction(action) {
   addLog(sentence);
   showToast(sentence);
   bumpAvatar();
+  Room.perform(ROOM_ACTIVITY[action]);
   afterChange();
+}
+
+// Clicking furniture in the room = doing its action (or explaining why not)
+function useFurniture(object) {
+  const action = FURNITURE[object];
+  if (!state || state.over || !action) return;
+  const reason = blockedReason(action);
+  if (reason) {
+    showToast(reason);
+    return;
+  }
+  doAction(action);
 }
 
 function buyItem(key) {
@@ -241,6 +306,7 @@ function buyItem(key) {
   addLog(sentence);
   showToast(sentence);
   bumpAvatar();
+  Room.perform(ROOM_ACTIVITY[key]);
   afterChange();
 }
 
@@ -249,6 +315,7 @@ function tick() {
   for (const [key, amount] of Object.entries(DECAY)) decay[key] = -amount;
   applyChanges(decay);
   state.elapsed += TICK_MS / 1000;
+  state.hour += 1;
   afterChange();
 }
 
@@ -264,10 +331,12 @@ function startGame() {
   characterName = el('name-input').value.trim();
   if (!characterName) return;
 
-  state = { ...START_STATE, elapsed: 0, over: false };
+  state = { ...START_STATE, elapsed: 0, hour: START_HOUR, over: false };
   el('character-name').textContent = characterName;
   el('log').replaceChildren();
   showScreen('game');
+  Room.reset();
+  Room.setActive(true);
   render();
   save();
   timer = setInterval(tick, TICK_MS);
@@ -275,10 +344,12 @@ function startGame() {
 
 function resumeGame(data) {
   characterName = data.name;
-  state = { ...data.state, over: false };
+  state = { hour: START_HOUR, ...data.state, over: false };
   el('character-name').textContent = characterName;
   el('log').replaceChildren();
   showScreen('game');
+  Room.reset();
+  Room.setActive(true);
   render();
   timer = setInterval(tick, TICK_MS);
 }
@@ -287,6 +358,7 @@ function resetGame() {
   clearInterval(timer);
   timer = null;
   state = null;
+  Room.setActive(false);
   clearSave();
   el('name-input').value = '';
   el('start-button').disabled = true;
@@ -353,7 +425,8 @@ for (const key of Object.keys(SHOP)) {
   el(`shop-${key}`).addEventListener('click', () => buyItem(key));
 }
 
-// ===== On startup: resume a saved game, or show the create screen =====
+// ===== On startup: draw the apartment, then resume a saved game or show the create screen =====
+Room.init(el('room'), { onUse: useFurniture });
 renderBest();
 try {
   const raw = localStorage.getItem(SAVE_KEY);

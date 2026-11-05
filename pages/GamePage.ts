@@ -36,6 +36,11 @@ export class GamePage {
   readonly survivalTime: Locator;
   readonly resetButton: Locator;
 
+  // הדירה: החדר, הדמות שמסתובבת בו והשעון של המשחק
+  readonly room: Locator;
+  readonly character: Locator;
+  readonly gameClock: Locator;
+
   // אזהרה, יומן, הודעה קופצת, מצב כהה/בהיר
   readonly warning: Locator;
   readonly logEntries: Locator;
@@ -67,6 +72,10 @@ export class GamePage {
     this.avatar = page.getByTestId('avatar');
     this.survivalTime = page.getByTestId('survival-time');
     this.resetButton = page.getByTestId('reset-button');
+
+    this.room = page.getByTestId('room');
+    this.character = page.getByTestId('character');
+    this.gameClock = page.getByTestId('game-clock');
 
     this.warning = page.getByTestId('warning');
     this.logEntries = page.getByTestId('log-text');
@@ -116,6 +125,11 @@ export class GamePage {
     await this.shopItem(name).click();
   }
 
+  /** לוחץ על רהיט בחדר: 'kitchen' | 'desk' | 'bed' | 'tv' | 'bath' */
+  async useFurniture(name: string) {
+    await this.furniture(name).click();
+  }
+
   // ===== מאתרים "מחושבים" (לפי שם) =====
 
   /** הערך המספרי של צורך, למשל needValue('food') */
@@ -131,6 +145,11 @@ export class GamePage {
   /** כפתור הפעולה, למשל action('work') */
   action(name: string): Locator {
     return this.page.getByTestId(`action-${name}`);
+  }
+
+  /** רהיט בחדר, למשל furniture('bed') */
+  furniture(name: string): Locator {
+    return this.page.getByTestId(`room-${name}`);
   }
 
   /** כפתור בחנות, למשל shopItem('coffee') */

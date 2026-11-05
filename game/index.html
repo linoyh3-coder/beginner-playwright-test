@@ -41,6 +41,22 @@
 
     <!-- Screen 2: the game -->
     <section class="game" data-test="game-screen" hidden>
+      <!-- The apartment (drawn by room.js) -->
+      <article class="card room-card" aria-labelledby="room-title">
+        <header class="card-header">
+          <h3 id="room-title">Home</h3>
+          <span class="clock-pill">
+            <span data-test="phase-icon" aria-hidden="true">☀️</span>
+            <span data-test="game-clock">Day 1 · 08:00</span>
+          </span>
+        </header>
+        <div class="room-wrap">
+          <svg class="room" data-test="room" data-phase="day" viewBox="-285 -250 570 580"
+               role="group" aria-label="Your apartment. Click furniture to use it."></svg>
+        </div>
+        <p class="muted small room-tip">Tip: click the kitchen, desk, bed, TV or bathtub to use them.</p>
+      </article>
+
       <!-- Profile -->
       <article class="card profile" aria-label="Buddy profile">
         <div class="avatar" data-test="avatar" aria-hidden="true">😄</div>
@@ -200,6 +216,7 @@
 
   <footer class="footer muted small">Tiny Life · a practice project for Playwright test automation</footer>
 
+  <script src="room.js"></script>
   <script src="game.js"></script>
 </body>
 </html>

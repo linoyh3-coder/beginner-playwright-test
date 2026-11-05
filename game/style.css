@@ -241,21 +241,119 @@ p { margin: 0; }
   grid-template-columns: 1fr;
   animation: rise 0.4s ease both;
 }
-@media (min-width: 860px) {
+@media (min-width: 900px) {
   .game {
-    grid-template-columns: 280px 1fr;
+    grid-template-columns: minmax(0, 1fr) 320px;
     grid-template-areas:
-      "profile needs"
-      "profile actions"
-      "profile shop"
-      "log     log";
+      "room    profile"
+      "room    needs"
+      "actions actions"
+      "shop    log";
   }
-  .profile { grid-area: profile; align-self: start; }
-  .needs-card { grid-area: needs; }
+  .room-card { grid-area: room; }
+  .profile { grid-area: profile; }
+  .needs-card { grid-area: needs; align-self: start; }
   .actions-card { grid-area: actions; }
   .shop-card { grid-area: shop; }
   .log-card { grid-area: log; }
 }
+
+/* ===== The apartment ===== */
+.room-card { display: flex; flex-direction: column; }
+.room-wrap { flex: 1; display: grid; place-items: center; }
+.room { width: 100%; max-width: 680px; height: auto; display: block; overflow: visible; }
+.room-tip { margin-top: 8px; text-align: center; }
+
+.clock-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Clickable furniture */
+.hotspot { cursor: pointer; outline: none; }
+.hotspot .hit {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 2;
+  stroke-dasharray: 6 5;
+  transition: fill 0.15s ease, stroke 0.15s ease;
+}
+.hotspot:hover .hit,
+.hotspot:focus-visible .hit { fill: rgba(255, 255, 255, 0.16); stroke: rgba(255, 255, 255, 0.95); }
+.hotspot.is-blocked { cursor: not-allowed; }
+.hotspot.is-blocked:hover .hit,
+.hotspot.is-blocked:focus-visible .hit { fill: rgba(217, 72, 72, 0.12); stroke: rgba(217, 72, 72, 0.9); }
+
+/* Day / evening / night */
+.room .overlay { opacity: 0; pointer-events: none; transition: opacity 1.2s ease; }
+.room[data-phase="evening"] .overlay { opacity: 0.14; }
+.room[data-phase="night"] .overlay { opacity: 0.42; }
+.room.is-sleeping .overlay { opacity: 0.52; }
+
+.room .lights { pointer-events: none; }
+.room .lamp-glow { opacity: 0.12; transition: opacity 1.2s ease; }
+.room[data-phase="evening"] .lamp-glow { opacity: 0.6; }
+.room[data-phase="night"] .lamp-glow { opacity: 0.95; }
+.room .window-glow { opacity: 0.35; transition: opacity 1.2s ease, fill 1.2s ease; }
+.room[data-phase="evening"] .window-glow { opacity: 0.8; }
+.room[data-phase="night"] .window-glow { opacity: 0.25; }
+.room .light-patch { opacity: 0.32; transition: opacity 1.2s ease, fill 1.2s ease; }
+.room[data-phase="evening"] .light-patch { opacity: 0.45; }
+.room[data-phase="night"] .light-patch { opacity: 0.1; }
+.room .stars { opacity: 0; transition: opacity 1.2s ease; }
+.room[data-phase="night"] .stars { opacity: 1; }
+.room[data-phase="night"] .sun { opacity: 0; }
+.room[data-phase="evening"] .sun { fill: #ffb347; }
+
+/* The buddy */
+.actor { pointer-events: none; transition: transform 1s ease-in-out, opacity 0.3s ease; }
+.actor .leg { transform-box: fill-box; transform-origin: 50% 0; }
+.actor.is-walking .leg-a { animation: step 0.42s ease-in-out infinite alternate; }
+.actor.is-walking .leg-b { animation: step 0.42s ease-in-out infinite alternate-reverse; }
+.actor.is-walking .upper { animation: bob 0.42s ease-in-out infinite alternate; }
+.actor .legs, .actor .upper { transition: opacity 0.2s ease, transform 0.2s ease; }
+.actor.is-sitting .legs { opacity: 0; }
+.actor.is-sitting .upper { transform: translateY(16px); }
+.room.is-sleeping .actor { opacity: 0; }
+
+.bubble { opacity: 0; transition: opacity 0.2s ease; }
+.bubble.visible { opacity: 1; }
+.bubble.is-thought rect { fill: #f3f3f3; stroke-dasharray: 3 3; stroke: rgba(0, 0, 0, 0.25); }
+.bubble.is-thought path { fill: #f3f3f3; }
+.bubble.visible:not(.is-thought) { animation: pop 0.25s ease; }
+
+/* Activities */
+.room .sleeper { opacity: 0; transition: opacity 0.4s ease; }
+.room.is-sleeping .sleeper { opacity: 1; }
+.room .zzz { opacity: 0; fill: #ffffff; font-weight: 800; }
+.room.is-sleeping .zzz { opacity: 1; }
+.room.is-sleeping .zzz text { animation: float-z 1.4s ease-in-out infinite; }
+
+.room .monitor-screen { transition: fill 0.3s ease; }
+.room.is-working .monitor-screen { fill: #c9ecff; }
+
+.room.is-watching .tv-screen { animation: tv-flash 0.7s steps(1) infinite; }
+
+.room .shower-water,
+.room .bath-bubbles { opacity: 0; transition: opacity 0.3s ease; }
+.room.is-showering .shower-water,
+.room.is-showering .bath-bubbles { opacity: 1; }
+.room.is-showering .shower-water line { animation: drip 0.5s linear infinite; }
+
+@keyframes step { from { transform: rotate(16deg); } to { transform: rotate(-16deg); } }
+@keyframes bob { to { transform: translateY(-2px); } }
+@keyframes pop { from { transform: translate(0, -112px) scale(0.6); } to { transform: translate(0, -118px) scale(1); } }
+@keyframes float-z { 0%, 100% { transform: translateY(0); opacity: 0.4; } 50% { transform: translateY(-6px); opacity: 1; } }
+@keyframes tv-flash { 0% { fill: #5ad1ff; } 33% { fill: #ff7ab6; } 66% { fill: #ffd166; } }
+@keyframes drip { to { stroke-dashoffset: -13; } }
 
 /* ===== Profile ===== */
 .profile {
