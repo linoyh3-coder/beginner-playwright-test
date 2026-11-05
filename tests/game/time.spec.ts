@@ -9,7 +9,7 @@ test.describe('הזמן עובר', () => {
     await page.goto('/');
     // עוצרים את הזמן – מעכשיו הוא זז רק כשאנחנו מריצים runFor
     await page.clock.pauseAt(new Date('2026-01-01T10:00:01'));
-    await page.getByTestId('name-input').fill('נועה');
+    await page.getByTestId('name-input').fill('Noa');
     await page.getByTestId('start-button').click();
   });
 
@@ -20,6 +20,7 @@ test.describe('הזמן עובר', () => {
     await expect(page.getByTestId('energy-value')).toHaveText('77');
     await expect(page.getByTestId('fun-value')).toHaveText('76');
     await expect(page.getByTestId('hygiene-value')).toHaveText('78');
+    await expect(page.getByTestId('survival-time')).toHaveText('0:03');
   });
 
   test('בלי טיפול מופיעה אזהרה ומצב הרוח נהיה גרוע', async ({ page }) => {
@@ -29,8 +30,10 @@ test.describe('הזמן עובר', () => {
 
     // שובע: 80 - 12×5 = 20 ← נמוך!
     await expect(page.getByTestId('warning')).toBeVisible();
-    await expect(page.getByTestId('warning')).toContainText('שובע');
-    await expect(page.getByTestId('mood')).toHaveText('גרוע 😢');
+    await expect(page.getByTestId('warning')).toContainText('Food');
+    await expect(page.getByTestId('mood')).toHaveText('Bad');
+    await expect(page.getByTestId('avatar')).toHaveText('😢');
+    await expect(page.getByTestId('survival-time')).toHaveText('0:36');
   });
 
   test('צרכים לא יורדים מתחת ל-0', async ({ page }) => {
@@ -38,14 +41,25 @@ test.describe('הזמן עובר', () => {
 
     await expect(page.getByTestId('food-value')).toHaveText('0');
     await expect(page.getByTestId('hygiene-value')).toHaveText('0');
+    await expect(page.getByTestId('survival-time')).toHaveText('3:00');
   });
 
   test('אכילה מצילה מאזהרה של רעב', async ({ page }) => {
     await page.clock.runFor(12 * 3000);
-    await expect(page.getByTestId('warning')).toContainText('שובע');
+    await expect(page.getByTestId('warning')).toContainText('Food');
 
     await page.getByTestId('action-eat').click();
 
-    await expect(page.getByTestId('warning')).not.toContainText('שובע');
+    await expect(page.getByTestId('warning')).not.toContainText('Food');
+  });
+
+  test('פס הצורך משנה צבע לאדום כשהוא נמוך', async ({ page }) => {
+    const foodBar = page.getByTestId('food-bar');
+    await expect(foodBar).not.toHaveClass(/level-low/);
+
+    await page.clock.runFor(12 * 3000);
+
+    await expect(foodBar).toHaveClass(/level-low/);
+    await expect(foodBar).toHaveAttribute('aria-valuenow', '20');
   });
 });

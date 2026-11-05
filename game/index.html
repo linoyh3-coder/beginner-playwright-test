@@ -1,69 +1,152 @@
 <!doctype html>
-<html lang="he" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>החבר הקטן שלי</title>
+  <meta name="description" content="Tiny Life – a small life-simulation game. Take care of your buddy's needs.">
+  <title>Tiny Life</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏡</text></svg>">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="app">
-    <h1>🏠 החבר הקטן שלי</h1>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">🏡</span>
+      <div>
+        <p class="brand-name">Tiny Life</p>
+        <p class="brand-tagline">Take care of your buddy</p>
+      </div>
+    </div>
+    <button class="icon-button" data-test="theme-toggle" type="button" aria-label="Switch to dark mode">🌙</button>
+  </header>
 
-    <!-- מסך 1: יצירת דמות -->
-    <section data-test="create-screen" class="card">
-      <label for="name-input">איך קוראים לדמות שלך?</label>
-      <input id="name-input" data-test="name-input" maxlength="20" placeholder="למשל: נועה" autocomplete="off">
-      <button data-test="start-button" disabled>יאללה, מתחילים!</button>
+  <main class="page">
+    <!-- Screen 1: create a character -->
+    <section class="create card" data-test="create-screen" aria-labelledby="create-title">
+      <div class="create-avatar" aria-hidden="true">🙂</div>
+      <h1 id="create-title">Create your buddy</h1>
+      <p class="muted">Give them a name and keep them fed, rested, clean and happy.</p>
+
+      <form class="create-form" data-test="create-form" novalidate>
+        <label class="field-label" for="name-input">Buddy name</label>
+        <input id="name-input" class="input" data-test="name-input" maxlength="20"
+               placeholder="e.g. Noa" autocomplete="off" required>
+        <button class="button button-primary" data-test="start-button" type="submit" disabled>
+          Start living <span aria-hidden="true">→</span>
+        </button>
+      </form>
     </section>
 
-    <!-- מסך 2: המשחק עצמו -->
-    <section data-test="game-screen" class="card" hidden>
-      <h2>👤 <span data-test="character-name"></span></h2>
-      <p>מצב רוח: <strong data-test="mood"></strong></p>
-      <p>💰 כסף: <strong data-test="money"></strong> ₪</p>
+    <!-- Screen 2: the game -->
+    <section class="game" data-test="game-screen" hidden>
+      <!-- Profile -->
+      <article class="card profile" aria-label="Buddy profile">
+        <div class="avatar" data-test="avatar" aria-hidden="true">😄</div>
+        <h2 class="profile-name" data-test="character-name"></h2>
 
-      <!-- הצרכים של הדמות (0 עד 100) -->
-      <div class="needs">
-        <div class="need">
-          <span>🍔 שובע</span>
-          <progress max="100" data-test="food-bar"></progress>
-          <span data-test="food-value"></span>
+        <span class="badge" data-test="mood-badge">Mood: <strong data-test="mood"></strong></span>
+
+        <dl class="facts">
+          <div class="fact">
+            <dt>Wallet</dt>
+            <dd>$<span data-test="money"></span></dd>
+          </div>
+          <div class="fact">
+            <dt>Alive for</dt>
+            <dd data-test="survival-time">0:00</dd>
+          </div>
+        </dl>
+
+        <button class="button button-ghost" data-test="reset-button" type="button">↺ Start over</button>
+      </article>
+
+      <!-- Needs -->
+      <article class="card needs-card" aria-labelledby="needs-title">
+        <header class="card-header">
+          <h3 id="needs-title">Needs</h3>
+          <span class="muted small">Drop every 3 seconds</span>
+        </header>
+
+        <p class="alert" data-test="warning" role="alert" hidden></p>
+
+        <ul class="needs">
+          <li class="need">
+            <span class="need-icon" aria-hidden="true">🍔</span>
+            <span class="need-label" id="food-label">Food</span>
+            <span class="need-value" data-test="food-value"></span>
+            <div class="bar" role="progressbar" aria-labelledby="food-label" aria-valuemin="0" aria-valuemax="100" data-test="food-bar"><div class="bar-fill"></div></div>
+          </li>
+          <li class="need">
+            <span class="need-icon" aria-hidden="true">⚡</span>
+            <span class="need-label" id="energy-label">Energy</span>
+            <span class="need-value" data-test="energy-value"></span>
+            <div class="bar" role="progressbar" aria-labelledby="energy-label" aria-valuemin="0" aria-valuemax="100" data-test="energy-bar"><div class="bar-fill"></div></div>
+          </li>
+          <li class="need">
+            <span class="need-icon" aria-hidden="true">🎉</span>
+            <span class="need-label" id="fun-label">Fun</span>
+            <span class="need-value" data-test="fun-value"></span>
+            <div class="bar" role="progressbar" aria-labelledby="fun-label" aria-valuemin="0" aria-valuemax="100" data-test="fun-bar"><div class="bar-fill"></div></div>
+          </li>
+          <li class="need">
+            <span class="need-icon" aria-hidden="true">🧼</span>
+            <span class="need-label" id="hygiene-label">Hygiene</span>
+            <span class="need-value" data-test="hygiene-value"></span>
+            <div class="bar" role="progressbar" aria-labelledby="hygiene-label" aria-valuemin="0" aria-valuemax="100" data-test="hygiene-bar"><div class="bar-fill"></div></div>
+          </li>
+        </ul>
+      </article>
+
+      <!-- Actions -->
+      <article class="card actions-card" aria-labelledby="actions-title">
+        <header class="card-header">
+          <h3 id="actions-title">Actions</h3>
+        </header>
+        <div class="actions">
+          <button class="action" data-test="action-eat" type="button">
+            <span class="action-icon" aria-hidden="true">🍔</span>
+            <span class="action-title">Eat</span>
+            <span class="chips"><span class="chip up">+30 Food</span><span class="chip down">−5 Hygiene</span><span class="chip down">−$10</span></span>
+            <span class="action-hint" data-test="eat-hint"></span>
+          </button>
+          <button class="action" data-test="action-sleep" type="button">
+            <span class="action-icon" aria-hidden="true">😴</span>
+            <span class="action-title">Sleep</span>
+            <span class="chips"><span class="chip up">+40 Energy</span></span>
+          </button>
+          <button class="action" data-test="action-play" type="button">
+            <span class="action-icon" aria-hidden="true">🎮</span>
+            <span class="action-title">Play</span>
+            <span class="chips"><span class="chip up">+25 Fun</span><span class="chip down">−10 Energy</span></span>
+          </button>
+          <button class="action" data-test="action-shower" type="button">
+            <span class="action-icon" aria-hidden="true">🚿</span>
+            <span class="action-title">Shower</span>
+            <span class="chips"><span class="chip up">+40 Hygiene</span></span>
+          </button>
+          <button class="action" data-test="action-work" type="button">
+            <span class="action-icon" aria-hidden="true">💼</span>
+            <span class="action-title">Work</span>
+            <span class="chips"><span class="chip up">+$20</span><span class="chip down">−15 Energy</span><span class="chip down">−10 Fun</span></span>
+            <span class="action-hint" data-test="work-hint"></span>
+          </button>
         </div>
-        <div class="need">
-          <span>⚡ אנרגיה</span>
-          <progress max="100" data-test="energy-bar"></progress>
-          <span data-test="energy-value"></span>
-        </div>
-        <div class="need">
-          <span>🎉 כיף</span>
-          <progress max="100" data-test="fun-bar"></progress>
-          <span data-test="fun-value"></span>
-        </div>
-        <div class="need">
-          <span>🧼 ניקיון</span>
-          <progress max="100" data-test="hygiene-bar"></progress>
-          <span data-test="hygiene-value"></span>
-        </div>
-      </div>
+      </article>
 
-      <p data-test="warning" class="warning" hidden></p>
-
-      <!-- פעולות -->
-      <div class="actions">
-        <button data-test="action-eat">🍔 לאכול (10 ₪)</button>
-        <button data-test="action-sleep">😴 לישון</button>
-        <button data-test="action-play">🎮 לשחק</button>
-        <button data-test="action-shower">🚿 להתקלח</button>
-        <button data-test="action-work">💼 לעבוד (+20 ₪)</button>
-      </div>
-
-      <h3>יומן פעולות</h3>
-      <ul data-test="log" class="log"></ul>
-
-      <button data-test="reset-button" class="secondary">התחלה מחדש</button>
+      <!-- Activity log -->
+      <article class="card log-card" aria-labelledby="log-title">
+        <header class="card-header">
+          <h3 id="log-title">Activity</h3>
+        </header>
+        <p class="muted small empty-log" data-test="log-empty">Nothing yet — pick an action to get started.</p>
+        <ol class="log" data-test="log"></ol>
+      </article>
     </section>
   </main>
+
+  <div class="toast" data-test="toast" role="status" aria-live="polite"></div>
+
+  <footer class="footer muted small">Tiny Life · a practice project for Playwright test automation</footer>
 
   <script src="game.js"></script>
 </body>
