@@ -35,14 +35,6 @@ test.describe('הזמן עובר', () => {
     await expect(game.survivalTime).toHaveText('0:36');
   });
 
-  test('צרכים לא יורדים מתחת ל-0', async () => {
-    await game.advanceSeconds(60 * 3); // 3 דקות
-
-    await expect(game.needValue('food')).toHaveText('0');
-    await expect(game.needValue('hygiene')).toHaveText('0');
-    await expect(game.survivalTime).toHaveText('3:00');
-  });
-
   test('אכילה מצילה מאזהרה של רעב', async () => {
     await game.advanceSeconds(12 * 3);
     await expect(game.warning).toContainText('Food');

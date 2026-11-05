@@ -13,10 +13,20 @@ export class GamePage {
   // מסכים
   readonly createScreen: Locator;
   readonly gameScreen: Locator;
+  readonly gameoverScreen: Locator;
 
   // מסך יצירת דמות
   readonly nameInput: Locator;
   readonly startButton: Locator;
+  readonly bestPill: Locator;
+  readonly bestTime: Locator;
+
+  // מסך סוף משחק
+  readonly gameoverName: Locator;
+  readonly gameoverTime: Locator;
+  readonly gameoverBest: Locator;
+  readonly gameoverRecord: Locator;
+  readonly playAgainButton: Locator;
 
   // פרופיל הדמות
   readonly characterName: Locator;
@@ -38,9 +48,18 @@ export class GamePage {
 
     this.createScreen = page.getByTestId('create-screen');
     this.gameScreen = page.getByTestId('game-screen');
+    this.gameoverScreen = page.getByTestId('gameover-screen');
 
     this.nameInput = page.getByTestId('name-input');
     this.startButton = page.getByTestId('start-button');
+    this.bestPill = page.getByTestId('best-pill');
+    this.bestTime = page.getByTestId('best-time');
+
+    this.gameoverName = page.getByTestId('gameover-name');
+    this.gameoverTime = page.getByTestId('gameover-time');
+    this.gameoverBest = page.getByTestId('gameover-best');
+    this.gameoverRecord = page.getByTestId('gameover-record');
+    this.playAgainButton = page.getByTestId('play-again');
 
     this.characterName = page.getByTestId('character-name');
     this.money = page.getByTestId('money');
@@ -92,6 +111,11 @@ export class GamePage {
     await this.action(name).click();
   }
 
+  /** קונה פריט בחנות: 'coffee' | 'pizza' | 'spa' */
+  async buyItem(name: string) {
+    await this.shopItem(name).click();
+  }
+
   // ===== מאתרים "מחושבים" (לפי שם) =====
 
   /** הערך המספרי של צורך, למשל needValue('food') */
@@ -107,6 +131,11 @@ export class GamePage {
   /** כפתור הפעולה, למשל action('work') */
   action(name: string): Locator {
     return this.page.getByTestId(`action-${name}`);
+  }
+
+  /** כפתור בחנות, למשל shopItem('coffee') */
+  shopItem(name: string): Locator {
+    return this.page.getByTestId(`shop-${name}`);
   }
 
   /** ההסבר שמופיע כשפעולה חסומה, למשל actionHint('eat') */

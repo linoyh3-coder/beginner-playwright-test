@@ -27,6 +27,8 @@
       <h1 id="create-title">Create your buddy</h1>
       <p class="muted">Give them a name and keep them fed, rested, clean and happy.</p>
 
+      <p class="best-pill" data-test="best-pill" hidden>🏆 Best time: <strong data-test="best-time"></strong></p>
+
       <form class="create-form" data-test="create-form" novalidate>
         <label class="field-label" for="name-input">Buddy name</label>
         <input id="name-input" class="input" data-test="name-input" maxlength="20"
@@ -133,6 +135,34 @@
         </div>
       </article>
 
+      <!-- Shop -->
+      <article class="card shop-card" aria-labelledby="shop-title">
+        <header class="card-header">
+          <h3 id="shop-title">Shop</h3>
+          <span class="muted small">Spend money on a boost</span>
+        </header>
+        <div class="actions">
+          <button class="action" data-test="shop-coffee" type="button">
+            <span class="action-icon" aria-hidden="true">☕</span>
+            <span class="action-title">Coffee</span>
+            <span class="chips"><span class="chip up">+60 Energy</span><span class="chip down">−$15</span></span>
+            <span class="action-hint" data-test="coffee-hint"></span>
+          </button>
+          <button class="action" data-test="shop-pizza" type="button">
+            <span class="action-icon" aria-hidden="true">🍕</span>
+            <span class="action-title">Pizza party</span>
+            <span class="chips"><span class="chip up">+50 Food</span><span class="chip up">+20 Fun</span><span class="chip down">−$25</span></span>
+            <span class="action-hint" data-test="pizza-hint"></span>
+          </button>
+          <button class="action" data-test="shop-spa" type="button">
+            <span class="action-icon" aria-hidden="true">🧖</span>
+            <span class="action-title">Spa day</span>
+            <span class="chips"><span class="chip up">+50 Hygiene</span><span class="chip up">+30 Fun</span><span class="chip down">−$30</span></span>
+            <span class="action-hint" data-test="spa-hint"></span>
+          </button>
+        </div>
+      </article>
+
       <!-- Activity log -->
       <article class="card log-card" aria-labelledby="log-title">
         <header class="card-header">
@@ -141,6 +171,28 @@
         <p class="muted small empty-log" data-test="log-empty">Nothing yet — pick an action to get started.</p>
         <ol class="log" data-test="log"></ol>
       </article>
+    </section>
+
+    <!-- Screen 3: game over -->
+    <section class="create card gameover" data-test="gameover-screen" aria-labelledby="gameover-title" hidden>
+      <div class="create-avatar" aria-hidden="true">😵</div>
+      <h1 id="gameover-title">Game over</h1>
+      <p class="muted"><strong data-test="gameover-name"></strong> couldn't keep it together.</p>
+
+      <span class="badge record" data-test="gameover-record" hidden>🎉 New record!</span>
+
+      <dl class="facts gameover-facts">
+        <div class="fact">
+          <dt>Survived</dt>
+          <dd data-test="gameover-time">0:00</dd>
+        </div>
+        <div class="fact">
+          <dt>Best time</dt>
+          <dd data-test="gameover-best">0:00</dd>
+        </div>
+      </dl>
+
+      <button class="button button-primary" data-test="play-again" type="button">Play again</button>
     </section>
   </main>
 
