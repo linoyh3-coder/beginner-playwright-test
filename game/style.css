@@ -1,0 +1,61 @@
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 24px 16px;
+  font-family: system-ui, "Segoe UI", Arial, sans-serif;
+  background: #f3efe6;
+  color: #2b2b2b;
+}
+
+.app { max-width: 520px; margin: 0 auto; }
+
+h1 { text-align: center; }
+
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+[hidden] { display: none !important; }
+
+input {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+button {
+  padding: 10px 14px;
+  font-size: 15px;
+  border: none;
+  border-radius: 8px;
+  background: #3b7a57;
+  color: #fff;
+  cursor: pointer;
+}
+
+button:disabled { background: #b8b8b8; cursor: not-allowed; }
+button.secondary { background: #8a6d3b; }
+
+.needs { display: flex; flex-direction: column; gap: 8px; }
+.need { display: grid; grid-template-columns: 90px 1fr 36px; align-items: center; gap: 8px; }
+progress { width: 100%; height: 16px; }
+
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.warning {
+  background: #fde8e8;
+  color: #9b1c1c;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin: 0;
+}
+
+.log { margin: 0; padding-inline-start: 20px; max-height: 150px; overflow-y: auto; }

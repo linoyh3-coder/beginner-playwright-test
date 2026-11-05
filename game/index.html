@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>החבר הקטן שלי</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app">
+    <h1>🏠 החבר הקטן שלי</h1>
+
+    <!-- מסך 1: יצירת דמות -->
+    <section data-test="create-screen" class="card">
+      <label for="name-input">איך קוראים לדמות שלך?</label>
+      <input id="name-input" data-test="name-input" maxlength="20" placeholder="למשל: נועה" autocomplete="off">
+      <button data-test="start-button" disabled>יאללה, מתחילים!</button>
+    </section>
+
+    <!-- מסך 2: המשחק עצמו -->
+    <section data-test="game-screen" class="card" hidden>
+      <h2>👤 <span data-test="character-name"></span></h2>
+      <p>מצב רוח: <strong data-test="mood"></strong></p>
+      <p>💰 כסף: <strong data-test="money"></strong> ₪</p>
+
+      <!-- הצרכים של הדמות (0 עד 100) -->
+      <div class="needs">
+        <div class="need">
+          <span>🍔 שובע</span>
+          <progress max="100" data-test="food-bar"></progress>
+          <span data-test="food-value"></span>
+        </div>
+        <div class="need">
+          <span>⚡ אנרגיה</span>
+          <progress max="100" data-test="energy-bar"></progress>
+          <span data-test="energy-value"></span>
+        </div>
+        <div class="need">
+          <span>🎉 כיף</span>
+          <progress max="100" data-test="fun-bar"></progress>
+          <span data-test="fun-value"></span>
+        </div>
+        <div class="need">
+          <span>🧼 ניקיון</span>
+          <progress max="100" data-test="hygiene-bar"></progress>
+          <span data-test="hygiene-value"></span>
+        </div>
+      </div>
+
+      <p data-test="warning" class="warning" hidden></p>
+
+      <!-- פעולות -->
+      <div class="actions">
+        <button data-test="action-eat">🍔 לאכול (10 ₪)</button>
+        <button data-test="action-sleep">😴 לישון</button>
+        <button data-test="action-play">🎮 לשחק</button>
+        <button data-test="action-shower">🚿 להתקלח</button>
+        <button data-test="action-work">💼 לעבוד (+20 ₪)</button>
+      </div>
+
+      <h3>יומן פעולות</h3>
+      <ul data-test="log" class="log"></ul>
+
+      <button data-test="reset-button" class="secondary">התחלה מחדש</button>
+    </section>
+  </main>
+
+  <script src="game.js"></script>
+</body>
+</html>
