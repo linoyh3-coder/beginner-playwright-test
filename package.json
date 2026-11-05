@@ -10,6 +10,7 @@
     "game": "node server.js",
     "test": "playwright test",
     "test:game": "playwright test tests/game --project=chromium",
+    "test:watch": "set SLOWMO=700&& playwright test tests/game --project=chromium --headed --workers=1",
     "test:headed": "playwright test --headed",
     "test:chromium": "playwright test --project=chromium",
     "test:ui": "playwright test --ui",

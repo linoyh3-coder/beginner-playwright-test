@@ -5,8 +5,10 @@ import { test, expect } from '@playwright/test';
 test.describe('הזמן עובר', () => {
   test.beforeEach(async ({ page }) => {
     // חייבים להתקין את השעון המזויף *לפני* שהדף נטען
-    await page.clock.install();
+    await page.clock.install({ time: new Date('2026-01-01T10:00:00') });
     await page.goto('/');
+    // עוצרים את הזמן – מעכשיו הוא זז רק כשאנחנו מריצים runFor
+    await page.clock.pauseAt(new Date('2026-01-01T10:00:01'));
     await page.getByTestId('name-input').fill('נועה');
     await page.getByTestId('start-button').click();
   });

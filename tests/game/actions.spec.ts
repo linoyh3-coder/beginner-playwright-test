@@ -3,7 +3,11 @@ import { test, expect } from '@playwright/test';
 test.describe('פעולות של הדמות', () => {
   // לפני כל בדיקה: נכנסים למשחק ויוצרים דמות בשם נועה
   test.beforeEach(async ({ page }) => {
+    // מקפיאים את הזמן: בלי זה, אם הבדיקה איטית (מעל 3 שניות),
+    // הצרכים יורדים באמצע והמספרים לא יוצאים כמו שציפינו
+    await page.clock.install({ time: new Date('2026-01-01T10:00:00') });
     await page.goto('/');
+    await page.clock.pauseAt(new Date('2026-01-01T10:00:01')); // הזמן עוצר כאן
     await page.getByTestId('name-input').fill('נועה');
     await page.getByTestId('start-button').click();
   });

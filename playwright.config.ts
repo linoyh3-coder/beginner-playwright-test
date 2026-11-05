@@ -36,6 +36,8 @@ export default defineConfig({
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
+    // האטה (במילישניות) בין כל פעולה, כדי לראות בעיניים מה קורה. ברירת מחדל: 0
+    launchOptions: { slowMo: Number(process.env.SLOWMO) || 0 },
   },
 
   // Playwright מפעיל את שרת המשחק לבד לפני הבדיקות, ומכבה אותו בסוף
