@@ -35,7 +35,8 @@ export default defineConfig({
     locale: 'en-US',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
+    // וידאו: רק כשבדיקה נכשלת. עם VIDEO=1 – מקליטים את כל הבדיקות
+    video: process.env.VIDEO ? 'on' : 'retain-on-failure',
     // האטה (במילישניות) בין כל פעולה, כדי לראות בעיניים מה קורה. ברירת מחדל: 0
     launchOptions: { slowMo: Number(process.env.SLOWMO) || 0 },
   },
