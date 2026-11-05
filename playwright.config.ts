@@ -22,7 +22,10 @@ export default defineConfig({
   timeout: 30_000,
   expect: { timeout: 5_000 },
 
-  reporter: [['html', { open: 'never' }], ['list']],
+  // ב-GitHub Actions מוסיפים גם דוח מיוחד שמסמן שגיאות ישר על הקוד
+  reporter: process.env.CI
+    ? [['html', { open: 'never' }], ['github'], ['list']]
+    : [['html', { open: 'never' }], ['list']],
 
   use: {
     // כתובת המשחק שלנו. page.goto('/') פותח את הכתובת הזו.

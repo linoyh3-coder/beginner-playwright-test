@@ -18,7 +18,7 @@ test('get started link', async ({ page }) => {
 
 // Homework
 // Learn what is masking, and why we need to use masking in e2e tests, does it has some limitation's
-// Learn about how to do correct snapshot testing, tell me where its usefull or where its wrong.
+// Learn about how to do correct snapshot testing, tell me where its useful or where its wrong.
 
 test('homepage hero matches its visual snapshot', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });

@@ -8,6 +8,9 @@ const username = process.env.SAUCE_USERNAME!;
 const password = process.env.SAUCE_PASSWORD!;
 
 test.describe('התחברות לחנות', () => {
+  // אם אין שם משתמש/סיסמה (למשל ב-GitHub בלי Secrets) – מדלגים במקום להיכשל
+  test.skip(!username || !password, 'חסרים SAUCE_USERNAME / SAUCE_PASSWORD');
+
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
   });
