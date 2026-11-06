@@ -258,27 +258,52 @@ p { margin: 0; }
   .log-card { grid-area: log; }
 }
 
-/* ===== The apartment ===== */
-.room-card { display: flex; flex-direction: column; }
-.room-wrap { flex: 1; display: grid; place-items: center; }
-.room { width: 100%; max-width: 680px; height: auto; display: block; overflow: visible; }
+/* ===== The apartment: a dark "stage" the room floats on ===== */
+.room-card {
+  display: flex;
+  flex-direction: column;
+  color: #f3eefb;
+  border-color: #2c2540;
+  background:
+    radial-gradient(60% 50% at 50% 52%, rgba(255, 176, 102, 0.18), transparent 70%),
+    radial-gradient(120% 90% at 50% 0%, #3b2f58 0%, #1c1629 55%, #110e1a 100%);
+  box-shadow: 0 24px 60px rgba(20, 10, 40, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+.room-card .card-header h3 { color: #ffffff; letter-spacing: 0.02em; }
+.room-card .room-tip { color: rgba(243, 238, 251, 0.55); }
+.room-wrap { position: relative; flex: 1; display: grid; place-items: center; padding: 4px 0; }
+.room-wrap::before {
+  content: "";
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: 3%;
+  height: 14%;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.6), transparent);
+  filter: blur(8px);
+}
+.room { position: relative; width: 100%; max-width: 700px; height: auto; display: block; overflow: visible; }
 .room-tip { margin-top: 8px; text-align: center; }
 
 .clock-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 12px;
+  padding: 5px 13px;
   border-radius: 999px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(6px);
   font-size: 13px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
-/* Clickable furniture */
-.hotspot { cursor: pointer; outline: none; }
+/* Only furniture reacts to the mouse */
+.room .scene { pointer-events: none; }
+.room .hotspot { pointer-events: auto; cursor: pointer; outline: none; }
 .hotspot .hit {
   fill: transparent;
   stroke: transparent;
@@ -287,33 +312,75 @@ p { margin: 0; }
   transition: fill 0.15s ease, stroke 0.15s ease;
 }
 .hotspot:hover .hit,
-.hotspot:focus-visible .hit { fill: rgba(255, 255, 255, 0.16); stroke: rgba(255, 255, 255, 0.95); }
+.hotspot:focus-visible .hit { fill: rgba(255, 255, 255, 0.14); stroke: rgba(255, 255, 255, 0.95); }
 .hotspot.is-blocked { cursor: not-allowed; }
 .hotspot.is-blocked:hover .hit,
-.hotspot.is-blocked:focus-visible .hit { fill: rgba(217, 72, 72, 0.12); stroke: rgba(217, 72, 72, 0.9); }
+.hotspot.is-blocked:focus-visible .hit { fill: rgba(217, 72, 72, 0.14); stroke: rgba(255, 120, 120, 0.95); }
 
-/* Day / evening / night */
-.room .overlay { opacity: 0; pointer-events: none; transition: opacity 1.2s ease; }
-.room[data-phase="evening"] .overlay { opacity: 0.14; }
-.room[data-phase="night"] .overlay { opacity: 0.42; }
-.room.is-sleeping .overlay { opacity: 0.52; }
+/* ===== Day / evening / night lighting ===== */
+.room .overlay { opacity: 0; pointer-events: none; transition: opacity 1.4s ease; }
+.room[data-phase="evening"] .overlay { opacity: 0.2; }
+.room[data-phase="night"] .overlay { opacity: 0.55; }
+.room.is-sleeping .overlay { opacity: 0.62; }
 
-.room .lights { pointer-events: none; }
-.room .lamp-glow { opacity: 0.12; transition: opacity 1.2s ease; }
-.room[data-phase="evening"] .lamp-glow { opacity: 0.6; }
-.room[data-phase="night"] .lamp-glow { opacity: 0.95; }
-.room .window-glow { opacity: 0.35; transition: opacity 1.2s ease, fill 1.2s ease; }
-.room[data-phase="evening"] .window-glow { opacity: 0.8; }
-.room[data-phase="night"] .window-glow { opacity: 0.25; }
-.room .light-patch { opacity: 0.32; transition: opacity 1.2s ease, fill 1.2s ease; }
+.room .lights { pointer-events: none; mix-blend-mode: screen; }
+.room .lights > * { transition: opacity 1.4s ease, fill 1.4s ease; }
+
+.room .light-beam { opacity: 0.55; }
+.room[data-phase="evening"] .light-beam { opacity: 0.35; }
+.room[data-phase="night"] .light-beam { opacity: 0; }
+.room .dust { opacity: 1; transition: opacity 1.4s ease; }
+.room[data-phase="night"] .dust { opacity: 0; }
+.room .light-patch { opacity: 0.38; transition: opacity 1.4s ease, fill 1.4s ease; }
 .room[data-phase="evening"] .light-patch { opacity: 0.45; }
-.room[data-phase="night"] .light-patch { opacity: 0.1; }
-.room .stars { opacity: 0; transition: opacity 1.2s ease; }
-.room[data-phase="night"] .stars { opacity: 1; }
-.room[data-phase="night"] .sun { opacity: 0; }
-.room[data-phase="evening"] .sun { fill: #ffb347; }
+.room[data-phase="night"] .light-patch { opacity: 0.12; }
 
-/* The buddy */
+.room .window-glow { fill: #d9f2ff; opacity: 0.3; }
+.room[data-phase="evening"] .window-glow { fill: #ffb45e; opacity: 0.85; }
+.room[data-phase="night"] .window-glow { fill: #6f7cff; opacity: 0.35; }
+
+.room .lamp-glow { opacity: 0.12; }
+.room .desk-glow, .room .led-glow { opacity: 0.3; }
+.room .fairy-glow { opacity: 0.2; }
+.room[data-phase="evening"] .lamp-glow { opacity: 0.65; }
+.room[data-phase="evening"] .desk-glow,
+.room[data-phase="evening"] .led-glow { opacity: 0.75; }
+.room[data-phase="evening"] .fairy-glow { opacity: 0.6; }
+.room[data-phase="night"] .lamp-glow,
+.room[data-phase="night"] .desk-glow,
+.room[data-phase="night"] .led-glow,
+.room[data-phase="night"] .fairy-glow { opacity: 1; }
+.room.is-sleeping .lamp-glow { opacity: 0.45; }
+
+.room .tv-glow { opacity: 0; }
+.room.is-watching .tv-glow { opacity: 0.9; animation: flicker 0.7s steps(2) infinite; }
+.room.is-working .desk-glow { opacity: 1; }
+
+.room .stars, .room .city-lights { opacity: 0; transition: opacity 1.4s ease; }
+.room[data-phase="evening"] .city-lights { opacity: 0.55; }
+.room[data-phase="night"] .stars,
+.room[data-phase="night"] .city-lights { opacity: 1; }
+.room .sun { transition: opacity 1.4s ease, fill 1.4s ease; }
+.room[data-phase="evening"] .sun { fill: #ff9f45; }
+.room[data-phase="night"] .sun { opacity: 0; }
+.room .skyline { color: #a8c0d6; transition: color 1.4s ease; }
+.room[data-phase="evening"] .skyline { color: #4b3562; }
+.room[data-phase="night"] .skyline { color: #121530; }
+
+.room .led { stroke-linecap: round; }
+
+/* ===== Little ambient animations ===== */
+.room .sway { transform-box: fill-box; transform-origin: 50% 100%; animation: sway 4.5s ease-in-out infinite alternate; }
+.room .steam path { animation: steam 2.6s ease-in-out infinite; }
+.room .dust circle { animation: drift 7s ease-in-out infinite; }
+.room .bulb { animation: twinkle 1.8s ease-in-out infinite alternate; }
+.room .star { animation: twinkle 2.4s ease-in-out infinite alternate; }
+.room .blink { animation: twinkle 1.2s steps(2) infinite; }
+.room .rgb { animation: rgb 3s ease-in-out infinite alternate; }
+.room .cat-tail { transform-box: fill-box; transform-origin: 0% 100%; animation: tail 2.6s ease-in-out infinite alternate; }
+.room .cat { transform-box: fill-box; transform-origin: 50% 100%; animation: breathe 3.2s ease-in-out infinite; }
+
+/* ===== The buddy ===== */
 .actor { pointer-events: none; transition: transform 1s ease-in-out, opacity 0.3s ease; }
 .actor .leg { transform-box: fill-box; transform-origin: 50% 0; }
 .actor.is-walking .leg-a { animation: step 0.42s ease-in-out infinite alternate; }
@@ -322,24 +389,27 @@ p { margin: 0; }
 .actor .legs, .actor .upper { transition: opacity 0.2s ease, transform 0.2s ease; }
 .actor.is-sitting .legs { opacity: 0; }
 .actor.is-sitting .upper { transform: translateY(16px); }
+.actor .breathe { transform-box: fill-box; transform-origin: 50% 100%; animation: breathe 3.4s ease-in-out infinite; }
+.actor .eye { transform-box: fill-box; transform-origin: center; animation: eye-blink 5s infinite; }
 .room.is-sleeping .actor { opacity: 0; }
+.actor .figure { transition: filter 1.4s ease; }
+.room[data-phase="evening"] .actor .figure { filter: brightness(0.92); }
+.room[data-phase="night"] .actor .figure { filter: brightness(0.78) saturate(0.9); }
 
 .bubble { opacity: 0; transition: opacity 0.2s ease; }
 .bubble.visible { opacity: 1; }
-.bubble.is-thought rect { fill: #f3f3f3; stroke-dasharray: 3 3; stroke: rgba(0, 0, 0, 0.25); }
-.bubble.is-thought path { fill: #f3f3f3; }
+.bubble.is-thought rect { fill: #f3f1f7; stroke-dasharray: 3 3; stroke: rgba(0, 0, 0, 0.25); }
+.bubble.is-thought path { fill: #f3f1f7; }
 .bubble.visible:not(.is-thought) { animation: pop 0.25s ease; }
 
-/* Activities */
+/* ===== Activities ===== */
 .room .sleeper { opacity: 0; transition: opacity 0.4s ease; }
 .room.is-sleeping .sleeper { opacity: 1; }
 .room .zzz { opacity: 0; fill: #ffffff; font-weight: 800; }
 .room.is-sleeping .zzz { opacity: 1; }
 .room.is-sleeping .zzz text { animation: float-z 1.4s ease-in-out infinite; }
 
-.room .monitor-screen { transition: fill 0.3s ease; }
-.room.is-working .monitor-screen { fill: #c9ecff; }
-
+.room.is-working .code-lines { animation: typing 0.9s steps(3) infinite; }
 .room.is-watching .tv-screen { animation: tv-flash 0.7s steps(1) infinite; }
 
 .room .shower-water,
@@ -350,10 +420,20 @@ p { margin: 0; }
 
 @keyframes step { from { transform: rotate(16deg); } to { transform: rotate(-16deg); } }
 @keyframes bob { to { transform: translateY(-2px); } }
-@keyframes pop { from { transform: translate(0, -112px) scale(0.6); } to { transform: translate(0, -118px) scale(1); } }
+@keyframes breathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1, 1.025); } }
+@keyframes eye-blink { 0%, 94%, 100% { transform: scaleY(1); } 97% { transform: scaleY(0.1); } }
+@keyframes pop { from { transform: translate(0, -116px) scale(0.6); } to { transform: translate(0, -122px) scale(1); } }
 @keyframes float-z { 0%, 100% { transform: translateY(0); opacity: 0.4; } 50% { transform: translateY(-6px); opacity: 1; } }
 @keyframes tv-flash { 0% { fill: #5ad1ff; } 33% { fill: #ff7ab6; } 66% { fill: #ffd166; } }
+@keyframes flicker { 0% { opacity: 0.9; } 50% { opacity: 0.6; } }
+@keyframes typing { 0% { opacity: 1; } 50% { opacity: 0.65; } }
 @keyframes drip { to { stroke-dashoffset: -13; } }
+@keyframes sway { from { transform: rotate(-2.5deg); } to { transform: rotate(2.5deg); } }
+@keyframes steam { 0% { opacity: 0; transform: translateY(4px); } 40% { opacity: 0.75; } 100% { opacity: 0; transform: translateY(-8px); } }
+@keyframes drift { 0%, 100% { transform: translate(0, 0); opacity: 0.2; } 50% { transform: translate(4px, -10px); opacity: 0.95; } }
+@keyframes twinkle { from { opacity: 0.45; } to { opacity: 1; } }
+@keyframes rgb { from { opacity: 0.35; } to { opacity: 0.95; } }
+@keyframes tail { from { transform: rotate(-14deg); } to { transform: rotate(10deg); } }
 
 /* ===== Profile ===== */
 .profile {
