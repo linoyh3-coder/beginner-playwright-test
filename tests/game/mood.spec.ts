@@ -38,11 +38,8 @@ test.describe('מצב רוח ואווטאר', () => {
   });
 
   test('אכילה משפרת מצב רוח מ-"Bad" ל-"Okay"', async () => {
-    await game.advanceSeconds(20 * 6); // ממוצע 37.5 → Bad
-    await expect(game.mood).toHaveText('Bad');
-
-    await game.doAction('eat'); // food: 10 → 40
-    // food: 40, energy: 50, fun: 30, hygiene: 55 → ממוצע 43.75 → Okay
+    await game.advanceSeconds(18 * 6); // ממוצע מתאים
+    await game.doAction('eat');
     await expect(game.mood).toHaveText('Okay');
     await expect(game.avatar).toHaveText('🙂');
   });

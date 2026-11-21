@@ -94,13 +94,13 @@ export class GamePage {
   /**
    * פותח את המשחק עם שעון מדומה (clock).
    * השעון מותקן *לפני* טעינת הדף כדי שהמשחק יתחיל מאותה שעה קבועה.
-   * לא משתמשים ב pauseAt: הוא גורם לשגיאה "Cannot fast-forward to the past"
-   * כשהדף נטען לאט (במיוחד עם SLOWMO), כי הזמן הווירטואלי כבר עבר את היעד.
-   * במקום זה, בדיקות שצריכות לקדם זמן משתמשות ב advanceSeconds (runFor).
+   * השעון נעצר מיד כדי למנוע תקתוקים בזמן אמת בזמן לחיצות ובדיקות.
+   * advanceSeconds ממשיך את הזמן בצורה מבוקרת.
    */
   async gotoWithFrozenClock() {
-    // מתקינים שעון מדומה
+    // מתקינים שעון מדומה ועוצרים אותו מיד
     await this.page.clock.install({ time: new Date('2026-01-01T10:00:00') });
+    await this.page.clock.pauseAt(new Date('2026-01-01T10:00:00'));
     await this.goto();
   }
 

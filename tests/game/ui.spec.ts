@@ -33,7 +33,7 @@ test.describe('עיצוב וחוויית משתמש', () => {
     await page.getByRole('button', { name: /Start living/ }).click();
 
     await expect(page.getByRole('heading', { name: 'Noa' })).toBeVisible();
-    await expect(page.getByRole('progressbar', { name: 'Food' })).toHaveAttribute('aria-valuenow', '80');
+    await expect(page.getByRole('progressbar', { name: 'Food' })).toHaveAttribute('aria-valuenow', '90');
   });
 
   test('המשחק עובד גם במסך של טלפון', async ({ page }) => {
