@@ -110,9 +110,17 @@
 
   // Soft shadow under a piece of furniture
   function contactShadow(parent, [x0, x1], [y0, y1], strength = 0.38) {
-    const e = 0.14;
-    onFloor(parent, [x0 - e, x1 + e], [y0 - e, y1 + e], 0.003, '#2b1408',
-      { opacity: strength, filter: 'url(#blur-sm)' });
+    const e = 0.16;
+    const g = group(parent);
+    // Deep core shadow
+    onFloor(g, [x0, x1], [y0, y1], 0.003, '#1a0a04', { opacity: strength * 1.2, filter: 'url(#blur-xs)' });
+    // Softer ambient occlusion
+    onFloor(g, [x0 - e, x1 + e], [y0 - e, y1 + e], 0.002, '#2b1408', { opacity: strength, filter: 'url(#blur-sm)' });
+  }
+
+  // A subtle reflection of objects on the polished floor
+  function floorReflection(parent, [x0, x1], [y0, y1], color = '#ffffff', opacity = 0.05) {
+    onFloor(parent, [x0, x1], [y0, y1], 0.005, color, { opacity, filter: 'url(#blur-md)' });
   }
 
   // Outline of a whole box – used as the clickable area of a piece of furniture
@@ -213,6 +221,12 @@
     blur('blur-md', 7);
     blur('blur-lg', 14);
 
+    // Texture pattern for subtle grain
+    const noise = make('filter', { id: 'noise' }, defs);
+    make('feTurbulence', { type: 'fractalNoise', baseFrequency: '0.65', numOctaves: '3', stitchTiles: 'stitch' }, noise);
+    make('feColorMatrix', { type: 'saturate', values: '0' }, noise);
+    make('feComponentTransfer', {}, noise).appendChild(make('feFuncA', { type: 'linear', slope: '0.1' }));
+
     const shadow = make('filter', { id: 'drop', x: '-30%', y: '-30%', width: '160%', height: '160%' }, defs);
     make('feDropShadow', { dx: 0, dy: 2, stdDeviation: 2, 'flood-color': '#000', 'flood-opacity': 0.25 }, shadow);
   }
@@ -253,6 +267,8 @@
         i++;
       }
     }
+    // High-end ambient polish overlay
+    onFloor(scene, [0, 10], [0, 10], 0.0015, '#ffffff', { opacity: 0.04, style: 'mix-blend-mode: overlay;' });
 
     // Skirting boards and soft dark corners where walls meet the floor
     block(scene, [0, 10], [0, 0.07], [0, 0.3], '#f7eee2');
@@ -414,9 +430,38 @@
     contactShadow(scene, [8.35, 9.85], [0.2, 1.0]);
     contactShadow(scene, [0.15, 2.25], [7.3, 9.85]);
     contactShadow(scene, [0.05, 0.9], [6.1, 7.1]);
+
+    // Floor reflections (subtle)
+    floorReflection(scene, [4.6, 7.4], [0.5, 4.2], '#ffffff', 0.04); // Bed reflection
+    floorReflection(scene, [8.35, 9.85], [0.3, 1.0], '#5ad1ff', 0.03); // TV reflection
   }
 
   // ===== Furniture =====
+
+  function buildCeilingFan(scene) {
+    const g = group(scene, 'ceiling-fan');
+    const x = 5, y = 5, z = 7.3;
+    const [cx, cy] = P(x, y, z);
+
+    // Mount
+    block(g, [4.85, 5.15], [4.85, 5.15], [7.3, 7.5], '#2b2b30');
+
+    // Rotating blades
+    const blades = group(g, 'fan-blades');
+    for (let i = 0; i < 4; i++) {
+      const angle = i * 90;
+      const blade = group(blades);
+      blade.setAttribute('transform', `rotate(${angle} ${cx} ${cy})`);
+      make('rect', {
+        x: cx - 4, y: cy - 70, width: 8, height: 60, rx: 4,
+        fill: '#3a3a42', opacity: 0.9
+      }, blade);
+    }
+
+    // Center cap
+    make('circle', { cx, cy, r: 8, fill: '#2b2b30' }, g);
+    make('circle', { cx, cy, r: 4, fill: '#4a4a54' }, g);
+  }
 
   function buildKitchen(scene) {
     const k = hotspot(scene, 'kitchen', 'Kitchen – eat');
@@ -791,6 +836,7 @@
       buildTv(scene);
       buildBath(scene);
       buildCozyCorner(scene);
+      buildCeilingFan(scene);
       poly(svg, [[-0.45, -0.45, 7.5], [10, -0.45, 7.5], [10, -0.45, -0.6], [10, 10, -0.6], [-0.45, 10, -0.6], [-0.45, 10, 7.5]],
         '#0d0a2a', { class: 'overlay' });
       buildLights(svg);

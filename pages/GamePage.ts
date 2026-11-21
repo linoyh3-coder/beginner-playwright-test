@@ -92,14 +92,16 @@ export class GamePage {
   }
 
   /**
-   * פותח את המשחק עם "זמן קפוא".
-   * בלי זה, בדיקה איטית (מעל 3 שניות) גורמת לצרכים לרדת באמצע.
-   * חייבים להתקין את השעון *לפני* טעינת הדף, ולכן זה כאן ולא ב-goto רגיל.
+   * פותח את המשחק עם שעון מדומה (clock).
+   * השעון מותקן *לפני* טעינת הדף כדי שהמשחק יתחיל מאותה שעה קבועה.
+   * לא משתמשים ב pauseAt: הוא גורם לשגיאה "Cannot fast-forward to the past"
+   * כשהדף נטען לאט (במיוחד עם SLOWMO), כי הזמן הווירטואלי כבר עבר את היעד.
+   * במקום זה, בדיקות שצריכות לקדם זמן משתמשות ב advanceSeconds (runFor).
    */
   async gotoWithFrozenClock() {
+    // מתקינים שעון מדומה
     await this.page.clock.install({ time: new Date('2026-01-01T10:00:00') });
     await this.goto();
-    await this.page.clock.pauseAt(new Date('2026-01-01T10:00:01'));
   }
 
   /** מריץ את הזמן קדימה בכמות שניות נתונה (עובד רק אחרי gotoWithFrozenClock) */

@@ -52,4 +52,27 @@ test.describe('הזמן עובר', () => {
     await expect(game.needBar('food')).toHaveClass(/level-low/);
     await expect(game.needBar('food')).toHaveAttribute('aria-valuenow', '20');
   });
+
+  test('פס הצורך נהיה ענבר כשהוא מתחת ל-50', async () => {
+    // MID_LIMIT = 50. אחרי 7 תקתוקים שובע = 80 - 35 = 45
+    await expect(game.needBar('food')).not.toHaveClass(/level-mid/);
+
+    await game.advanceSeconds(7 * 3);
+
+    await expect(game.needBar('food')).toHaveClass(/level-mid/);
+    await expect(game.needBar('food')).toHaveAttribute('aria-valuenow', '45');
+  });
+
+  test('כשכמה צרכים נמוכים בו-זמנית מופיעות כמה אזהרות', async () => {
+    // אוכלים 4 פעמים: שובע=100, ניקיון=60, כסף=10
+    for (let i = 0; i < 4; i++) {
+      await game.doAction('eat');
+    }
+
+    // 16 תקתוקים: שובע=20, כיף=16 ← שניהם מתחת ל-20 (LOW_LIMIT)
+    await game.advanceSeconds(16 * 3);
+
+    await expect(game.warning).toContainText('Food');
+    await expect(game.warning).toContainText('Fun');
+  });
 });

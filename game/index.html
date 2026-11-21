@@ -6,6 +6,8 @@
   <meta name="description" content="Tiny Life – a small life-simulation game. Take care of your buddy's needs.">
   <title>Tiny Life</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏡</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -72,6 +74,10 @@
           <div class="fact">
             <dt>Alive for</dt>
             <dd data-test="survival-time">0:00</dd>
+          </div>
+          <div class="fact fact-level">
+            <dt>Level</dt>
+            <dd>⭐ <span data-test="level">1</span> <span class="level-label" data-test="level-label">Rookie</span></dd>
           </div>
         </dl>
 
@@ -176,6 +182,12 @@
             <span class="chips"><span class="chip up">+50 Hygiene</span><span class="chip up">+30 Fun</span><span class="chip down">−$30</span></span>
             <span class="action-hint" data-test="spa-hint"></span>
           </button>
+          <button class="action" data-test="shop-gym" type="button">
+            <span class="action-icon" aria-hidden="true">🏋️</span>
+            <span class="action-title">Gym</span>
+            <span class="chips"><span class="chip up">+35 Energy</span><span class="chip down">−20 Hygiene</span><span class="chip down">−$20</span></span>
+            <span class="action-hint" data-test="gym-hint"></span>
+          </button>
         </div>
       </article>
 
@@ -197,6 +209,11 @@
 
       <span class="badge record" data-test="gameover-record" hidden>🎉 New record!</span>
 
+      <div class="grade-wrap">
+        <span class="grade-badge" data-test="grade"></span>
+        <p class="grade-desc muted small" data-test="grade-desc"></p>
+      </div>
+
       <dl class="facts gameover-facts">
         <div class="fact">
           <dt>Survived</dt>
@@ -206,6 +223,10 @@
           <dt>Best time</dt>
           <dd data-test="gameover-best">0:00</dd>
         </div>
+        <div class="fact fact-level">
+          <dt>Level reached</dt>
+          <dd>⭐ <span data-test="gameover-level">1</span></dd>
+        </div>
       </dl>
 
       <button class="button button-primary" data-test="play-again" type="button">Play again</button>
@@ -214,9 +235,25 @@
 
   <div class="toast" data-test="toast" role="status" aria-live="polite"></div>
 
+  <!-- Lofi music player -->
+  <div class="music-player" id="music-player" aria-label="Lofi music player">
+    <button class="music-btn" id="music-toggle" type="button" aria-label="Play lofi music">
+      <span class="music-icon" aria-hidden="true">🎵</span>
+    </button>
+    <div class="music-info">
+      <span class="music-label">Lofi</span>
+      <div class="music-bars" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+    </div>
+    <input type="range" class="music-vol" id="music-vol"
+      min="0" max="100" value="42" aria-label="Music volume">
+  </div>
+
   <footer class="footer muted small">Tiny Life · a practice project for Playwright test automation</footer>
 
   <script src="room.js"></script>
+  <script src="music.js"></script>
   <script src="game.js"></script>
 </body>
 </html>

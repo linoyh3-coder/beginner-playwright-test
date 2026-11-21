@@ -6,7 +6,7 @@
 const TICK_MS = 3000;
 
 // Starting values for a new buddy
-const START_STATE = { food: 80, energy: 80, fun: 80, hygiene: 80, money: 50 };
+const START_STATE = { food: 80, energy: 80, fun: 80, hygiene: 80, money: 50, level: 1 };
 
 // How much each need drops on every tick
 const DECAY = { food: 5, energy: 3, fun: 4, hygiene: 2 };
@@ -28,6 +28,7 @@ const SHOP = {
   coffee: { verb: 'grabbed a coffee',    cost: 15, changes: { energy: 60 } },
   pizza:  { verb: 'threw a pizza party', cost: 25, changes: { food: 50, fun: 20 } },
   spa:    { verb: 'enjoyed a spa day',   cost: 30, changes: { hygiene: 50, fun: 30 } },
+  gym:    { verb: 'crushed a workout',   cost: 20, changes: { energy: 35, hygiene: -20 } },
 };
 
 // At or below this value a need is "low" and a warning shows
@@ -40,6 +41,19 @@ const MOODS = [
   { min: 40, label: 'Okay',  face: '🙂', className: 'mood-okay' },
   { min: 0,  label: 'Bad',   face: '😢', className: 'mood-bad' },
 ];
+
+// Survival grade: earned at game over based on seconds survived
+const GRADES = [
+  { min: 300, grade: 'S', desc: 'Legendary survivor' },
+  { min: 180, grade: 'A', desc: 'Impressive run' },
+  { min:  90, grade: 'B', desc: 'Solid effort' },
+  { min:  48, grade: 'C', desc: 'Getting there' },
+  { min:  20, grade: 'D', desc: 'Short visit' },
+  { min:   0, grade: 'F', desc: 'Better luck next time' },
+];
+
+// Title shown next to the level number
+const LEVEL_LABELS = ['Rookie', 'Survivor', 'Veteran', 'Expert', 'Master', 'Legend'];
 
 // The in-game clock: the game starts at 08:00 and every tick is one hour
 const START_HOUR = 8;
@@ -58,6 +72,7 @@ const ROOM_ACTIVITY = {
   coffee: { spot: 'kitchen', emoji: '☕' },
   pizza:  { spot: 'tv',      emoji: '🍕', effect: 'tv' },
   spa:    { spot: 'bath',    emoji: '🧖', effect: 'shower' },
+  gym:    { spot: 'bath',    emoji: '🏋️' },
 };
 
 // Clicking a piece of furniture in the room runs this action
@@ -192,6 +207,18 @@ function render() {
     if (hint) hint.textContent = blocked ? 'Not enough money' : '';
   }
 
+  // Level + label
+  const level = state.level ?? 1;
+  el('level').textContent = level;
+  el('level-label').textContent = LEVEL_LABELS[Math.min(level - 1, LEVEL_LABELS.length - 1)];
+
+  // Urgent highlight: action buttons pulse when their linked need is critically low
+  const urgentMap = { eat: 'food', sleep: 'energy', shower: 'hygiene', play: 'fun' };
+  for (const [action, need] of Object.entries(urgentMap)) {
+    const btn = el(`action-${action}`);
+    if (btn) btn.classList.toggle('urgent', state[need] <= LOW_LIMIT && !btn.disabled);
+  }
+
   // The apartment: clock, light, the buddy's face and thoughts, usable furniture
   const phase = timeOfDay(state.hour);
   el('game-clock').textContent = formatClock(state.hour);
@@ -246,6 +273,25 @@ function afterChange() {
 
 // ===== Game over =====
 
+function launchConfetti() {
+  const colors = ['#2f7a55', '#4fb784', '#e0a526', '#d94848', '#8b5cf6', '#3b82f6', '#f97316'];
+  for (let i = 0; i < 44; i++) {
+    const p = document.createElement('span');
+    p.className = 'confetti-piece';
+    p.style.cssText = [
+      `left:${Math.random() * 100}vw`,
+      `background:${colors[i % colors.length]}`,
+      `animation-delay:${(Math.random() * 0.5).toFixed(2)}s`,
+      `animation-duration:${(0.75 + Math.random() * 0.65).toFixed(2)}s`,
+      `width:${4 + Math.random() * 6}px`,
+      `height:${4 + Math.random() * 6}px`,
+      `border-radius:${Math.random() > 0.5 ? '50%' : '2px'}`,
+    ].join(';');
+    document.body.appendChild(p);
+    p.addEventListener('animationend', () => p.remove());
+  }
+}
+
 function checkGameOver() {
   if (!state || state.over) return;
   const dead = Object.keys(NEEDS).some((key) => state[key] <= 0);
@@ -268,6 +314,14 @@ function gameOver() {
   el('gameover-time').textContent = formatTime(state.elapsed);
   el('gameover-best').textContent = formatTime(loadBest());
   el('gameover-record').hidden = !isRecord;
+  if (isRecord) launchConfetti();
+
+  const { grade, desc } = GRADES.find((g) => state.elapsed >= g.min);
+  const gradeEl = el('grade');
+  gradeEl.textContent = grade;
+  gradeEl.className = `grade-badge grade-${grade}`;
+  el('grade-desc').textContent = desc;
+  el('gameover-level').textContent = state.level ?? 1;
 
   el('game-screen').hidden = true;
   el('gameover-screen').hidden = false;
@@ -311,12 +365,26 @@ function buyItem(key) {
 }
 
 function tick() {
+  const level = state.level ?? 1;
+  const decayMult = 1 + (level - 1) * 0.20;
   const decay = {};
-  for (const [key, amount] of Object.entries(DECAY)) decay[key] = -amount;
+  for (const [key, amount] of Object.entries(DECAY)) {
+    decay[key] = -Math.round(amount * decayMult);
+  }
   applyChanges(decay);
   state.elapsed += TICK_MS / 1000;
   state.hour += 1;
-  afterChange();
+
+  const isNewDay = state.hour > 0 && state.hour % 24 === 0;
+  if (isNewDay) state.level = level + 1;
+
+  render();
+  save();
+  checkGameOver();
+
+  if (isNewDay && state && !state.over) {
+    showToast(`📅 Day ${Math.floor(state.hour / 24) + 1} — Level ${state.level}! Needs drop faster.`);
+  }
 }
 
 // ===== Screens =====
@@ -344,7 +412,7 @@ function startGame() {
 
 function resumeGame(data) {
   characterName = data.name;
-  state = { hour: START_HOUR, ...data.state, over: false };
+  state = { level: 1, hour: START_HOUR, ...data.state, over: false };
   el('character-name').textContent = characterName;
   el('log').replaceChildren();
   showScreen('game');
@@ -422,7 +490,8 @@ for (const action of Object.keys(ACTIONS)) {
   el(`action-${action}`).addEventListener('click', () => doAction(action));
 }
 for (const key of Object.keys(SHOP)) {
-  el(`shop-${key}`).addEventListener('click', () => buyItem(key));
+  const btn = el(`shop-${key}`);
+  if (btn) btn.addEventListener('click', () => buyItem(key));
 }
 
 // ===== On startup: draw the apartment, then resume a saved game or show the create screen =====

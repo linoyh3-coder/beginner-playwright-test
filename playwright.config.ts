@@ -17,7 +17,7 @@ export default defineConfig({
 
   // Retry flaky tests on CI only.
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers: 1, // הגבלת workers למניעת בעיות clock ויציבות
 
   timeout: 30_000,
   expect: { timeout: 5_000 },
