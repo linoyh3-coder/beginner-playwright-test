@@ -16,10 +16,10 @@ test.describe('הדירה', () => {
   });
 
   test('לחיצה על המיטה בחדר = שינה, והדמות הולכת למיטה', async () => {
-    await game.doAction('work'); // אנרגיה 80 → 65
+    await game.doAction('work'); // אנרגיה 90 → 75
     await game.useFurniture('bed');
 
-    await expect(game.needValue('energy')).toHaveText('100'); // 65 + 40, חסום ב-100
+    await expect(game.needValue('energy')).toHaveText('100'); // 75 + 40, חסום ב-100
     await expect(game.character).toHaveAttribute('data-location', 'bed');
   });
 
@@ -74,7 +74,9 @@ test.describe('הדירה', () => {
   });
 
   test('כשצורך נמוך הדמות "חושבת" עליו', async ({ page }) => {
-    await game.advanceSeconds(12 * 3); // שובע יורד ל-20
+    // שובע יורד 4 בכל תקתוק, מתחיל ב-90 → מגיע ל-<=20 אחרי 18 תקתוקים (90-72=18)
+    // כל תקתוק = 6 שניות → 18 * 6 = 108 שניות
+    await game.advanceSeconds(18 * 6); // שובע יורד ל-18
 
     await expect(page.locator('.bubble')).toHaveClass(/is-thought/);
     await expect(page.locator('.bubble text')).toHaveText('🍔');
@@ -95,19 +97,19 @@ test.describe('יום ולילה', () => {
     await expect(game.room).toHaveAttribute('data-phase', 'day');
   });
 
-  test('כל 3 שניות עוברת שעה במשחק', async () => {
-    await game.advanceSeconds(3);
+  test('כל 6 שניות עוברת שעה במשחק', async () => {
+    await game.advanceSeconds(6);
     await expect(game.gameClock).toHaveText('Day 1 · 09:00');
   });
 
   test('בשעה 17:00 מתחיל ערב', async () => {
-    await game.advanceSeconds(9 * 3); // 9 שעות: 08:00 → 17:00
+    await game.advanceSeconds(9 * 6); // 9 שעות: 08:00 → 17:00
     await expect(game.gameClock).toHaveText('Day 1 · 17:00');
     await expect(game.room).toHaveAttribute('data-phase', 'evening');
   });
 
   test('בשעה 20:00 יורד לילה', async () => {
-    await game.advanceSeconds(12 * 3); // 12 שעות: 08:00 → 20:00
+    await game.advanceSeconds(12 * 6); // 12 שעות: 08:00 → 20:00
     await expect(game.gameClock).toHaveText('Day 1 · 20:00');
     await expect(game.room).toHaveAttribute('data-phase', 'night');
   });

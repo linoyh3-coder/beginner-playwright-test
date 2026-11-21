@@ -2,14 +2,18 @@
 
 // ===== Game settings =====
 
-// How often needs drop (milliseconds). 3000 = 3 seconds
-const TICK_MS = 3000;
+// How often needs drop (milliseconds). 6000 = 6 seconds
+// (Slower on purpose: gives the player time to enjoy the game instead of
+//  scrambling to survive. Each in-game hour now takes 6 real seconds.)
+const TICK_MS = 6000;
 
 // Starting values for a new buddy
-const START_STATE = { food: 80, energy: 80, fun: 80, hygiene: 80, money: 50, level: 1 };
+const START_STATE = { food: 90, energy: 90, fun: 90, hygiene: 90, money: 50, level: 1 };
 
 // How much each need drops on every tick
-const DECAY = { food: 5, energy: 3, fun: 4, hygiene: 2 };
+// (Lower numbers than before, so needs last longer and the buddy stays
+//  happy for a good while before the player has to step in.)
+const DECAY = { food: 4, energy: 2, fun: 3, hygiene: 1.5 };
 
 // Display names of the needs
 const NEEDS = { food: 'Food', energy: 'Energy', fun: 'Fun', hygiene: 'Hygiene' };
@@ -105,7 +109,7 @@ function applyChanges(changes) {
 // Rules for the free actions: returns the block reason, or '' if allowed
 function blockedReason(action) {
   if (action === 'eat' && state.money < 10) return 'Not enough money';
-  if (action === 'work' && state.energy < 15) return 'Too tired to work';
+  if (action === 'work' && state.energy <= 15) return 'Too tired to work';
   return '';
 }
 
@@ -338,6 +342,8 @@ function doAction(action) {
   bumpAvatar();
   Room.perform(ROOM_ACTIVITY[action]);
   afterChange();
+  // feed the achievements system (may unlock something → its own toast)
+  if (window.Achievements) window.Achievements.track(action, state);
 }
 
 // Clicking furniture in the room = doing its action (or explaining why not)
@@ -362,6 +368,8 @@ function buyItem(key) {
   bumpAvatar();
   Room.perform(ROOM_ACTIVITY[key]);
   afterChange();
+  // feed the achievements system (pizza party counts too)
+  if (window.Achievements) window.Achievements.track(key, state);
 }
 
 function tick() {
@@ -400,6 +408,7 @@ function startGame() {
   if (!characterName) return;
 
   state = { ...START_STATE, elapsed: 0, hour: START_HOUR, over: false };
+  if (window.Achievements) window.Achievements.reset();
   el('character-name').textContent = characterName;
   el('log').replaceChildren();
   showScreen('game');
@@ -428,6 +437,7 @@ function resetGame() {
   state = null;
   Room.setActive(false);
   clearSave();
+  if (window.Achievements) window.Achievements.reset();
   el('name-input').value = '';
   el('start-button').disabled = true;
   el('toast').classList.remove('visible');

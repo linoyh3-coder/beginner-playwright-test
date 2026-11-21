@@ -38,7 +38,7 @@ test.describe('שמירה אוטומטית', () => {
   test('אחרי סוף משחק לא חוזרים לדמות שמתה', async ({ page }) => {
     await game.gotoWithFrozenClock();
     await game.createCharacter('Noa');
-    await game.advanceSeconds(16 * 3); // מגיעים לסוף משחק
+    await game.advanceSeconds(23 * 6); // מגיעים לסוף משחק
     await expect(game.gameoverScreen).toBeVisible();
 
     await page.reload();

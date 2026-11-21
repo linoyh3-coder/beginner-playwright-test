@@ -14,9 +14,9 @@ test.describe('פעולות של הדמות', () => {
   test('אכילה מעלה שובע, מורידה ניקיון ועולה 10 $', async () => {
     await game.doAction('eat');
 
-    // 80 + 30 = 110, אבל המקסימום הוא 100
+    // 90 + 30 = 120, אבל המקסימום הוא 100
     await expect(game.needValue('food')).toHaveText('100');
-    await expect(game.needValue('hygiene')).toHaveText('75');
+    await expect(game.needValue('hygiene')).toHaveText('85');
     await expect(game.money).toHaveText('40');
   });
 
@@ -24,15 +24,15 @@ test.describe('פעולות של הדמות', () => {
     await game.doAction('play');
 
     await expect(game.needValue('fun')).toHaveText('100');
-    await expect(game.needValue('energy')).toHaveText('70');
+    await expect(game.needValue('energy')).toHaveText('80');
   });
 
   test('עבודה מכניסה כסף אבל מעייפת', async () => {
     await game.doAction('work');
 
     await expect(game.money).toHaveText('70');
-    await expect(game.needValue('energy')).toHaveText('65');
-    await expect(game.needValue('fun')).toHaveText('70');
+    await expect(game.needValue('energy')).toHaveText('75');
+    await expect(game.needValue('fun')).toHaveText('80');
   });
 
   test('שינה ומקלחת לא עוברות את 100', async () => {
@@ -55,12 +55,12 @@ test.describe('פעולות של הדמות', () => {
   });
 
   test('אי אפשר לעבוד כשהדמות עייפה מדי', async () => {
-    // אנרגיה: 80 → 65 → 50 → 35 → 20 → 5
+    // אנרגיה: 90 → 75 → 60 → 45 → 30 → 15
     for (let i = 0; i < 5; i++) {
       await game.doAction('work');
     }
 
-    await expect(game.needValue('energy')).toHaveText('5');
+    await expect(game.needValue('energy')).toHaveText('15');
     await expect(game.action('work')).toBeDisabled();
     await expect(game.actionHint('work')).toHaveText('Too tired to work');
 

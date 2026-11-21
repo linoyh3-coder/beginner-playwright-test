@@ -28,10 +28,10 @@ test.describe('יצירת דמות', () => {
     // בדיקת ערכי ההתחלה
     await expect(game.characterName).toHaveText('Noa');
     await expect(game.money).toHaveText('50');
-    await expect(game.needValue('food')).toHaveText('80');
-    await expect(game.needValue('energy')).toHaveText('80');
-    await expect(game.needValue('fun')).toHaveText('80');
-    await expect(game.needValue('hygiene')).toHaveText('80');
+    await expect(game.needValue('food')).toHaveText('90');
+    await expect(game.needValue('energy')).toHaveText('90');
+    await expect(game.needValue('fun')).toHaveText('90');
+    await expect(game.needValue('hygiene')).toHaveText('90');
     await expect(game.mood).toHaveText('Great');
     await expect(game.avatar).toHaveText('😄');
     await expect(game.survivalTime).toHaveText('0:00');
