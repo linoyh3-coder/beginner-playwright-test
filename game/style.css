@@ -881,6 +881,39 @@ p { margin: 0; }
   100% { transform: translateY(100vh) rotate(680deg) scale(0.7); opacity: 0; }
 }
 
+/* ===== Sims-like Visual & Action FX ===== */
+.fx-particle {
+  pointer-events: none;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: fx-float 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes fx-float {
+  0% { transform: translate(0, 0) scale(0.7); opacity: 0; }
+  15% { transform: translate(0, -6px) scale(1.1); opacity: 1; }
+  100% { transform: translate(var(--fx-drift, 8px), -48px) scale(0.8); opacity: 0; }
+}
+
+.fx-ring {
+  pointer-events: none;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: fx-ring 1.2s ease-out forwards;
+}
+@keyframes fx-ring {
+  0% { transform: scale(0.5); opacity: 0.8; stroke-width: 2; }
+  100% { transform: scale(2.2); opacity: 0; stroke-width: 0.5; }
+}
+
+.needs-notify {
+  animation: needs-bump 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes needs-bump {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }

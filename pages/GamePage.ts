@@ -163,4 +163,26 @@ export class GamePage {
   actionHint(name: string): Locator {
     return this.page.getByTestId(`${name}-hint`);
   }
+
+  // ===== אפקטים חזותיים חדשים (Sims-style) =====
+
+  /** חלקיקים מעופפים בחדר (נוצרים בעת ביצוע פעולה) */
+  fxParticles(): Locator {
+    return this.page.locator('[data-test="room"] .fx-particle');
+  }
+
+  /** טבעת האנרגיה שמופיעה סביב הרגליים בעת פעולה */
+  fxRing(): Locator {
+    return this.page.locator('[data-test="room"] .fx-ring');
+  }
+
+  /** שכבת האפקטים כולה */
+  fxLayer(): Locator {
+    return this.page.locator('[data-test="room"] .fx-layer');
+  }
+
+  /** אנימציית הפעימה של פס הצרכים */
+  needBarPulse(need: string): Locator {
+    return this.page.getByTestId(`${need}-bar`).locator('..');
+  }
 }

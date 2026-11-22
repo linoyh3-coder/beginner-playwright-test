@@ -261,6 +261,19 @@ function showToast(text) {
   toastTimer = setTimeout(() => toast.classList.remove('visible'), 2200);
 }
 
+function bumpNeeds(changes) {
+  for (const key of Object.keys(NEEDS)) {
+    if (changes[key] && changes[key] > 0) {
+      const elBar = document.querySelector(`[data-test="${key}-bar"]`)?.closest('.need');
+      if (elBar) {
+        elBar.classList.remove('needs-notify');
+        void elBar.offsetWidth;
+        elBar.classList.add('needs-notify');
+      }
+    }
+  }
+}
+
 function bumpAvatar() {
   const avatar = el('avatar');
   avatar.classList.remove('bump');
@@ -335,7 +348,9 @@ function gameOver() {
 
 function doAction(action) {
   if (!state || state.over || blockedReason(action)) return;
-  applyChanges(ACTIONS[action].changes);
+  const changes = ACTIONS[action].changes;
+  applyChanges(changes);
+  bumpNeeds(changes);
   const sentence = `${characterName} ${ACTIONS[action].verb}`;
   addLog(sentence);
   showToast(sentence);
@@ -361,7 +376,9 @@ function useFurniture(object) {
 function buyItem(key) {
   const item = SHOP[key];
   if (!state || state.over || state.money < item.cost) return;
-  applyChanges({ money: -item.cost, ...item.changes });
+  const changes = { money: -item.cost, ...item.changes };
+  applyChanges(changes);
+  bumpNeeds(changes);
   const sentence = `${characterName} ${item.verb}`;
   addLog(sentence);
   showToast(sentence);

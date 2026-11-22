@@ -804,8 +804,50 @@
 
   const EFFECT_CLASSES = { sleep: 'is-sleeping', shower: 'is-showering', tv: 'is-watching', work: 'is-working' };
 
-  function startEffect(effect) {
+  const SPARKLES = {
+    kitchen: ['🍔', '✨', '💛'],
+    bed: ['💤', '✨', '💙'],
+    tv: ['🎮', '⭐', '✨'],
+    bath: ['🫧', '💧', '✨'],
+    desk: ['💻', '💡', '✨'],
+  };
+
+  function playParticles(spot, emoji) {
+    const sparkles = SPARKLES[spot] || ['✨', emoji, '💛'];
+    const [bx, by] = P(pos.x, pos.y, 0.5);
+    const layer = group(ui.svg, 'fx-layer');
+
+    // פריט ראשי עף למעלה
+    const main = make('text', { x: (bx - 6).toFixed(1), y: (by - 35).toFixed(1), 'font-size': '18', class: 'fx-particle' }, layer);
+    main.textContent = emoji || '✨';
+    setTimeout(() => main.remove(), 1500);
+
+    // ניצוצות קטנים מסביב
+    for (let i = 0; i < 5; i++) {
+      const drift = (i - 2) * 16;
+      const delay = i * 0.08;
+      const p = make('text', {
+        x: (bx + (i - 2) * 6).toFixed(1),
+        y: (by - 20 - (i % 2) * 12).toFixed(1),
+        'font-size': '11',
+        class: 'fx-particle',
+        style: `--fx-drift:${drift}px;animation-delay:${delay}s;`
+      }, layer);
+      p.textContent = sparkles[i % sparkles.length];
+      setTimeout(() => p.remove(), 1600);
+    }
+
+    // טבעת אנרגיה מסביב לרגליים
+    const ring = make('ellipse', {
+      cx: bx.toFixed(1), cy: by.toFixed(1),
+      rx: '18', ry: '7', fill: 'none', stroke: '#ffe58a', 'stroke-width': '2', class: 'fx-ring'
+    }, layer);
+    setTimeout(() => ring.remove(), 1300);
+  }
+
+  function startEffect(effect, spot, emoji) {
     if (EFFECT_CLASSES[effect]) ui.svg.classList.add(EFFECT_CLASSES[effect]);
+    if (spot) playParticles(spot, emoji);
   }
 
   function endEffects() {
@@ -868,16 +910,18 @@
     },
 
     // Walk to the right furniture and play the activity: { spot, emoji, effect }
-    perform({ spot, emoji = '', effect = '' }) {
+    perform({ spot, emoji = '', effect = '', fx = true }) {
       clearTimers();
       endEffects();
+      document.querySelector('.fx-layer')?.remove();
       busy = true;
       const walk = moveTo(spot);
       sayEmoji = emoji;
       updateBubble();
-      later(() => startEffect(effect), walk);
+      later(() => startEffect(effect, fx ? spot : null, emoji), walk);
       later(() => {
         endEffects();
+        document.querySelector('.fx-layer')?.remove();
         sayEmoji = '';
         busy = false;
         updateBubble();
